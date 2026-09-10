@@ -5,8 +5,11 @@
 覆盖当天 0:00..24:00 共 24 个小时；小时值(kW)阶梯应用到该小时 6 个 10 分钟时段。"""
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from scipy.optimize import linprog
 from scipy.sparse import lil_matrix
+
+BASE = Path(__file__).resolve().parent.parent
 
 DT = 1.0 / 6.0
 T = 144
@@ -28,16 +31,16 @@ FOUR_DAYS = ['2025-03-20', '2025-06-21', '2025-09-23', '2025-12-21']
 
 
 def load_data():
-    a1 = pd.read_excel('附件/附件1.xlsx')
+    a1 = pd.read_excel(BASE / '附件/附件1.xlsx')
     price1 = a1['电价'].to_numpy(float)                       # (144,)
-    load_df = pd.read_excel('附件/附件2.xlsx', sheet_name='小区负载')
-    pv_df = pd.read_excel('附件/附件2.xlsx', sheet_name='光伏发电实际功率')
+    load_df = pd.read_excel(BASE / '附件/附件2.xlsx', sheet_name='小区负载')
+    pv_df = pd.read_excel(BASE / '附件/附件2.xlsx', sheet_name='光伏发电实际功率')
     dates = pd.to_datetime(load_df.iloc[:, 0])
     LOAD = load_df.iloc[:, 1:].to_numpy(float) * DT           # (365,144) kWh
     PV = pv_df.iloc[:, 1:].to_numpy(float) * DT
-    a4 = pd.read_excel('附件/附件4.xlsx')
+    a4 = pd.read_excel(BASE / '附件/附件4.xlsx')
     PRICE4 = a4.iloc[:, 1:].to_numpy(float)                   # (365,144)
-    a3 = pd.read_excel('附件/附件3.xlsx')
+    a3 = pd.read_excel(BASE / '附件/附件3.xlsx')
     a3.iloc[:, 0] = a3.iloc[:, 0].ffill()
     d3 = pd.to_datetime(a3.iloc[:, 0])
     # FC[d, j, k-1]: 第 d 天 STAGES[j] 时刻发布的「预报k小时」, 单位 kW(小时均值)

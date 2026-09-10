@@ -5,10 +5,13 @@ import os
 import shutil
 import time
 import numpy as np
+from pathlib import Path
 from openpyxl import load_workbook
 from lp_core import (load_data, q2_year, q3_year, write_result,
                      BLOCKS, BNAMES, SIX_TIMES, FOUR_DAYS, DAYS_OUT,
                      SOC_LO, SOC_HI)
+
+BASE = Path(__file__).resolve().parent.parent
 
 t_start = time.time()
 L = []
@@ -17,7 +20,7 @@ def log(s=''):
     L.append(s)
     print(s)
 
-BAK = '附件/附件5/templates_bak'
+BAK = BASE / '附件/附件5/templates_bak'
 assert os.path.exists(BAK), '先运行 q3.py 完成模板备份'
 
 D = load_data()
@@ -142,23 +145,25 @@ for d in range(365):
 log('Q4-Q3 total>=Σprice·adj 下界: 通过')
 
 # ---------- 写 xlsx ----------
-n_em2 = write_result(os.path.join(BAK, 'result4-2.xlsx'), 'result4-2.xlsx',
+OUT42 = BASE / 'result4-2.xlsx'
+OUT43 = BASE / 'result4-3.xlsx'
+n_em2 = write_result(BAK / 'result4-2.xlsx', OUT42,
                      dates, q2_v, with_adj=False)
-shutil.copy('result4-2.xlsx', '附件/附件5/result4-2.xlsx')
-n_em3 = write_result(os.path.join(BAK, 'result4-3.xlsx'), 'result4-3.xlsx',
+shutil.copy(OUT42, BASE / '附件/附件5/result4-2.xlsx')
+n_em3 = write_result(BAK / 'result4-3.xlsx', OUT43,
                      dates, q3_v, with_adj=True)
-shutil.copy('result4-3.xlsx', '附件/附件5/result4-3.xlsx')
+shutil.copy(OUT43, BASE / '附件/附件5/result4-3.xlsx')
 log('result4-2.xlsx (紧急区间行 %d), result4-3.xlsx (紧急区间行 %d) 已生成并覆盖 附件/附件5/'
     % (n_em2, n_em3))
 
-wb = load_workbook('result4-2.xlsx', read_only=True)
+wb = load_workbook(OUT42, read_only=True)
 for name in ['计划购电量', '充放电量', '紧急购电量']:
     ws = wb[name]
     log('result4-2 sheet %-6s: %d 行 x %d 列' % (name, ws.max_row, ws.max_column))
 assert wb['计划购电量'].max_row == len(DAYS_OUT) + 1
 assert wb['充放电量'].max_row == len(DAYS_OUT) * 6 + 1
 wb.close()
-wb = load_workbook('result4-3.xlsx', read_only=True)
+wb = load_workbook(OUT43, read_only=True)
 for name in ['计划购电量', '调整购电量', '充放电量', '紧急购电量']:
     ws = wb[name]
     log('result4-3 sheet %-6s: %d 行 x %d 列' % (name, ws.max_row, ws.max_column))
@@ -170,6 +175,6 @@ log('sheet结构校验通过')
 
 log('')
 log('总耗时 %.1fs' % (time.time() - t_start))
-with open('q4_log.txt', 'w', encoding='utf-8') as f:
+with open(BASE / 'q4_log.txt', 'w', encoding='utf-8') as f:
     f.write('\n'.join(L))
 print('q4_log.txt written')

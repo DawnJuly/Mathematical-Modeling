@@ -2,10 +2,13 @@
 """问题2：全年逐日 LP（SOC 跨天连续传递），输出 result2.xlsx"""
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from scipy.optimize import linprog
 from scipy.sparse import lil_matrix
 import shutil, io, datetime
 from openpyxl import load_workbook
+
+BASE = Path(__file__).resolve().parent.parent
 
 DT = 1.0 / 6.0
 T = 144
@@ -14,17 +17,17 @@ ETA = 0.9
 SOC_LO, SOC_HI = 1200.0, 10800.0
 EMERG = 5.0
 
-log = io.open('q2_log.txt', 'w', encoding='utf-8')
+log = io.open(BASE / 'q2_log.txt', 'w', encoding='utf-8')
 def pr(*a):
     s = ' '.join(str(x) for x in a)
     log.write(s + '\n')
     print(s.encode('gbk', 'replace').decode('gbk'))
 
 # ---------- data ----------
-a1 = pd.read_excel('附件/附件1.xlsx')
+a1 = pd.read_excel(BASE / '附件/附件1.xlsx')
 price = a1['电价'].to_numpy(float)                      # 144, same every day
-load_df = pd.read_excel('附件/附件2.xlsx', sheet_name='小区负载')
-pv_df   = pd.read_excel('附件/附件2.xlsx', sheet_name='光伏发电实际功率')
+load_df = pd.read_excel(BASE / '附件/附件2.xlsx', sheet_name='小区负载')
+pv_df   = pd.read_excel(BASE / '附件/附件2.xlsx', sheet_name='光伏发电实际功率')
 dates = pd.to_datetime(load_df.iloc[:, 0])
 LOAD = load_df.iloc[:, 1:].to_numpy(float) * DT         # 365 x 144 kWh
 PV   = pv_df.iloc[:, 1:].to_numpy(float) * DT
@@ -111,8 +114,9 @@ for ds in ['2025-03-20', '2025-06-21', '2025-09-23', '2025-12-21']:
 # ---------- write result2.xlsx ----------
 OUT_START = 31                       # 2025-02-01
 out_days = list(range(OUT_START, NDAYS))
-shutil.copy('附件/附件5/result2.xlsx', 'result2.xlsx')
-wb = load_workbook('result2.xlsx')
+OUT2 = BASE / 'result2.xlsx'
+shutil.copy(BASE / '附件/附件5/result2.xlsx', OUT2)
+wb = load_workbook(OUT2)
 
 # sheet 1: 计划购电量 (rows already exist: 334 dates)
 ws = wb['计划购电量']
@@ -168,6 +172,6 @@ for d in out_days:
         n_emerg_rows += 1
 pr('\n紧急购电量 sheet 写入行数: %d' % n_emerg_rows)
 
-wb.save('result2.xlsx')
+wb.save(OUT2)
 pr('result2.xlsx 已生成')
 log.close()

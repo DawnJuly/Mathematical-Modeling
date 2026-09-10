@@ -703,18 +703,29 @@ body('本文框架可沿三个方向推广。其一，引入滚动预报与策�
 # ================= 参考文献 =================
 h1('参考文献')
 refs = [
- '[1] 《运筹学》教材编写组. 运筹学[M]. 5版. 北京: 清华大学出版社, 2021.',
- '[2] HUANGFU Q, HALL J A J. Parallelizing the dual revised simplex method[J]. '
- 'Mathematical Programming Computation, 2018, 10(1): 119-142.',
- '[3] VIRTANEN P, GOMMERS R, OLIPHANT T E, et al. SciPy 1.0: fundamental algorithms for '
+ '[1] 鲁宗相, 王彩霞, 闵勇, 等. 微电网研究综述[J]. 电力系统自动化, 2007, 31(19): 100-107.',
+ '[2] 杨新法, 苏剑, 吕志鹏, 等. 微电网技术综述[J]. 中国电机工程学报, 2014, 34(1): 57-70.',
+ '[3] 王成山, 武震, 李鹏. 微电网关键技术研究[J]. 电工技术学报, 2014, 29(2): 1-12.',
+ '[4] 丁明, 张颖媛, 茆美琴, 等. 微网研究中的关键技术[J]. 电网技术, 2009, 33(11): 6-11.',
+ '[5] 周林, 黄勇, 郭珂, 等. 微电网储能技术研究综述[J]. 电力系统保护与控制, 2011, 39(7): 147-152.',
+ '[6] 李霞林, 郭力, 王成山, 等. 直流微电网关键技术研究综述[J]. 中国电机工程学报, 2016, 36(1): 2-17.',
+ '[7] 吴雄, 王秀丽, 刘世民, 等. 微电网能量管理系统研究综述[J]. 电力自动化设备, 2014, 34(10): 7-14.',
+ '[8] 桑丙玉, 王德顺, 杨波, 等. 平滑新能源输出波动的储能优化配置方法[J]. '
+ '中国电机工程学报, 2014, 34(22): 3700-3706.',
+ '[9] 张钦, 王锡凡, 付敏, 等. 电力市场下需求响应研究综述[J]. 电力系统自动化, 2008, 32(3): 97-106.',
+ '[10] 刘卫亮, 刘长良, 林永君, 等. 计及雾霾影响因素的光伏发电超短期功率预测[J]. '
+ '中国电机工程学报, 2018, 38(14): 4086-4095.',
+ '[11] 《运筹学》教材编写组. 运筹学[M]. 5版. 北京: 清华大学出版社, 2021.',
+ '[12] 姜启源, 谢金星, 叶俊. 数学模型[M]. 5版. 北京: 高等教育出版社, 2018.',
+ '[13] 盛骤, 谢式千, 潘承毅. 概率论与数理统计[M]. 4版. 北京: 高等教育出版社, 2008.',
+ '[14] VIRTANEN P, GOMMERS R, OLIPHANT T E, et al. SciPy 1.0: fundamental algorithms for '
  'scientific computing in Python[J]. Nature Methods, 2020, 17(3): 261-272.',
- '[4] 鲁宗相, 王彩霞, 闵勇, 等. 微电网研究综述[J]. 电力系统自动化, 2007, 31(19): 100-107.',
- '[5] 王成山, 李鹏. 分布式发电、微网与智能配电网的发展与挑战[J]. 电力系统自动化, 2010, 34(2): 10-14.',
- '[6] 王成山, 武震, 李鹏. 微电网关键技术研究[J]. 电工技术学报, 2014, 29(2): 1-12.',
- '[7] 杨新法, 苏剑, 吕志鹏, 等. 微电网技术综述[J]. 中国电机工程学报, 2014, 34(1): 57-70.',
- '[8] 丁明, 张颖媛, 茆美琴. 微网研究中的关键技术[J]. 电网技术, 2009, 33(11): 6-11.',
- '[9] 张建华, 黄伟. 微电网运行控制与保护技术[M]. 北京: 中国电力出版社, 2010.',
- '[10] GILL P E, MURRAY W, WRIGHT M H. Practical Optimization[M]. London: Academic Press, 1981.',
+ '[15] PALMA-BEHNKE R, BENAVIDES C, LANAS F, et al. A microgrid energy management system '
+ 'based on the rolling horizon strategy[J]. IEEE Transactions on Smart Grid, 2013, 4(2): 996-1006.',
+ '[16] PARISIO A, RIKOS E, GLIELMO L. A model predictive control approach to microgrid operation '
+ 'optimization[J]. IEEE Transactions on Control Systems Technology, 2014, 22(5): 1813-1827.',
+ '[17] HUANGFU Q, HALL J A J. Parallelizing the dual revised simplex method[J]. '
+ 'Mathematical Programming Computation, 2018, 10(1): 119-142.',
 ]
 for s in refs:
     p = doc.add_paragraph()
@@ -725,19 +736,20 @@ for s in refs:
 # ================= 附录 =================
 h1('附  录')
 h2('附录1  支撑材料清单')
-for s in ['（1）q1.py：问题一单日周期线性规划求解程序（生成 result1.xlsx）；',
-          '（2）q2.py：问题二全年滚动优化求解程序（生成 result2.xlsx 与 q2_log.txt）；',
+for s in ['（1）code/q1.py：问题一单日周期线性规划求解程序（生成 result1.xlsx）；',
+          '（2）code/q2.py：问题二全年滚动优化求解程序（生成 result2.xlsx 与 q2_log.txt）；',
           '（3）result1.xlsx：问题一完整计划购电策略与充放电结果；',
           '（4）result2.xlsx：问题二 2025-02-01 至 2025-12-31 共 334 天的完整购电策略；',
           '（5）q2_log.txt：问题二运行日志（含四个指定日的详细结果）；',
-          '（6）q3.py：问题三滚动时域调度求解程序（生成 result3.xlsx 与 q3_log.txt）；',
-          '（7）q4.py：问题四波动电价重算程序（生成 result4-2.xlsx、result4-3.xlsx 与 q4_log.txt）；',
-          '（8）lp_core.py：问题一至四共用的线性规划建模与求解核心模块；',
+          '（6）code/q3.py：问题三滚动时域调度求解程序（生成 result3.xlsx 与 q3_log.txt）；',
+          '（7）code/q4.py：问题四波动电价重算程序（生成 result4-2.xlsx、result4-3.xlsx 与 q4_log.txt）；',
+          '（8）code/lp_core.py：问题一至四共用的线性规划建模与求解核心模块；',
           '（9）result3.xlsx：问题三全年滚动调整计划与实际总电费结果；',
           '（10）result4-2.xlsx、result4-3.xlsx：问题四波动电价下问题二、三的重算结果；',
           '（11）q3_log.txt、q4_log.txt：问题三、四运行日志；',
-          '（12）make_figs_q12.py、make_figs_q34.py：论文插图生成程序（生成 pic/ 目录 12 张图）；',
-          '（13）make_paper.py：本论文 Word 文档生成程序。']:
+          '（12）pic/qic1.py～qic4.py：问题一至四论文插图生成程序（生成 pic/ 目录 12 张图）；',
+          '（13）make_paper.py：本论文 Word 文档生成程序；',
+          '（14）thesis/参考文献.docx：可阅读的真实参考文献汇编（知网可查）。']:
     body(s, indent=False)
 
 
@@ -752,11 +764,11 @@ def code_appendix(title, path):
             _set_font(r, cn=SONG, en=CONS, size=9)   # 等宽字体小五号
 
 
-code_appendix('附录2  问题一求解程序 q1.py 全文', 'C题/q1.py')
-code_appendix('附录3  问题二求解程序 q2.py 全文', 'C题/q2.py')
-code_appendix('附录4  模型构建核心模块 lp_core.py 全文', 'C题/lp_core.py')
-code_appendix('附录5  问题三求解程序 q3.py 全文', 'C题/q3.py')
-code_appendix('附录6  问题四求解程序 q4.py 全文', 'C题/q4.py')
+code_appendix('附录2  问题一求解程序 code/q1.py 全文', 'C题/code/q1.py')
+code_appendix('附录3  问题二求解程序 code/q2.py 全文', 'C题/code/q2.py')
+code_appendix('附录4  模型构建核心模块 code/lp_core.py 全文', 'C题/code/lp_core.py')
+code_appendix('附录5  问题三求解程序 code/q3.py 全文', 'C题/code/q3.py')
+code_appendix('附录6  问题四求解程序 code/q4.py 全文', 'C题/code/q4.py')
 
 # ================= 保存并回读验证 =================
 OUT = '2026数学建模国赛论文.docx'

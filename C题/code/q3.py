@@ -7,10 +7,13 @@ import os
 import shutil
 import time
 import numpy as np
+from pathlib import Path
 from openpyxl import load_workbook
 from lp_core import (load_data, q2_year, q3_year, fc_error_stats, write_result,
                      STAGES, BLOCKS, BNAMES, SIX_TIMES, FOUR_DAYS, DAYS_OUT,
                      SOC_LO, SOC_HI, T)
+
+BASE = Path(__file__).resolve().parent.parent
 
 t_start = time.time()
 L = []  # 日志行
@@ -20,11 +23,11 @@ def log(s=''):
     print(s)
 
 # ---------- 0. 模板备份(仅首次) ----------
-BAK = '附件/附件5/templates_bak'
+BAK = BASE / '附件/附件5/templates_bak'
 if not os.path.exists(BAK):
     os.makedirs(BAK)
     for f in ['result3.xlsx', 'result4-2.xlsx', 'result4-3.xlsx']:
-        shutil.copy(os.path.join('附件/附件5', f), os.path.join(BAK, f))
+        shutil.copy(BASE / '附件/附件5' / f, BAK / f)
     log('模板已备份到 %s' % BAK)
 
 # ---------- 1. 数据 ----------
@@ -169,20 +172,21 @@ assert abs(q2_tot - 12254765.72) < 1.0
 log('q2_year 复现 result2 总电费 12254765.72: 通过')
 
 # ---------- 9. 写 result3.xlsx ----------
-n_em = write_result(os.path.join(BAK, 'result3.xlsx'), 'result3.xlsx',
+OUT3 = BASE / 'result3.xlsx'
+n_em = write_result(BAK / 'result3.xlsx', OUT3,
                     dates, q3, with_adj=True)
-shutil.copy('result3.xlsx', '附件/附件5/result3.xlsx')
+shutil.copy(OUT3, BASE / '附件/附件5/result3.xlsx')
 log('result3.xlsx 已生成并覆盖 附件/附件5/result3.xlsx, 紧急购电量sheet写入区间行数: %d' % n_em)
 
 # sheet 结构复核
-wb = load_workbook('result3.xlsx', read_only=True)
+wb = load_workbook(OUT3, read_only=True)
 for name, exp_col in [('计划购电量', 147), ('调整购电量', 147), ('充放电量', 6),
                       ('紧急购电量', 3)]:
     ws = wb[name]
     log('sheet %-6s: %d 行 x %d 列' % (name, ws.max_row, ws.max_column))
 wb.close()
 exp_rows = len(DAYS_OUT) * 6 + 1
-wb = load_workbook('result3.xlsx', read_only=True)
+wb = load_workbook(OUT3, read_only=True)
 assert wb['计划购电量'].max_row == len(DAYS_OUT) + 1
 assert wb['调整购电量'].max_row == len(DAYS_OUT) + 1
 assert wb['充放电量'].max_row == exp_rows
@@ -191,6 +195,6 @@ log('sheet结构(335/335/%d 数据行)校验通过' % exp_rows)
 
 log('')
 log('总耗时 %.1fs' % (time.time() - t_start))
-with open('q3_log.txt', 'w', encoding='utf-8') as f:
+with open(BASE / 'q3_log.txt', 'w', encoding='utf-8') as f:
     f.write('\n'.join(L))
 print('q3_log.txt written')

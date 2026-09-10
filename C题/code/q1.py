@@ -2,10 +2,13 @@
 """问题1：单日周期 LP 购电策略"""
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from scipy.optimize import linprog
 from scipy.sparse import lil_matrix, vstack
 import shutil
 from openpyxl import load_workbook
+
+BASE = Path(__file__).resolve().parent.parent
 
 DT = 1.0 / 6.0          # 10 min in hours
 T = 144                 # periods per day
@@ -14,7 +17,7 @@ ETA = 0.9
 SOC_LO, SOC_HI = 1200.0, 10800.0
 
 # ---------- data ----------
-a1 = pd.read_excel('附件/附件1.xlsx')
+a1 = pd.read_excel(BASE / '附件/附件1.xlsx')
 price = a1['电价'].to_numpy(float)          # 144
 load  = a1['小区负载'].to_numpy(float) * DT # kWh per period
 pv    = a1['光伏发电预测功率'].to_numpy(float) * DT
@@ -89,8 +92,9 @@ for n, (a, b) in zip(names, blocks):
     print('  %-12s 充电 %.4f  放电 %.4f' % (n, ch[a:b].sum(), dis[a:b].sum()))
 
 # ---------- write result1.xlsx ----------
-shutil.copy('附件/附件5/result1.xlsx', 'result1.xlsx')
-wb = load_workbook('result1.xlsx')
+OUT1 = BASE / 'result1.xlsx'
+shutil.copy(BASE / '附件/附件5/result1.xlsx', OUT1)
+wb = load_workbook(OUT1)
 ws = wb['计划购电量']
 for t in range(T):
     ws.cell(row=t + 2, column=2, value=round(float(buy[t]), 4))
@@ -100,5 +104,5 @@ for r, (a, b) in enumerate(blocks):
     ws2.cell(row=r + 2, column=3, value=round(float(dis[a:b].sum()), 4))
 ws2.cell(row=2, column=5, value=round(float(soc[0]), 4))    # 0:00
 ws2.cell(row=3, column=5, value=round(float(soc[-1]), 4))   # 24:00
-wb.save('result1.xlsx')
+wb.save(OUT1)
 print('\nresult1.xlsx 已生成')
