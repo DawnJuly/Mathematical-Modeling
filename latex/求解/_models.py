@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.optimize import linprog
+from scipy.sparse import csr_matrix
 
 # ---- 常量 ----
 DT = 1.0 / 6.0          # 10分钟 = 1/6 小时
@@ -161,6 +162,163 @@ def solve_daily(L, S, price, e0=None, soc_cycle=False, k0=0, k1=N_INT - 1):
     E = x[3 * n:4 * n + 1]
     cost = float(res.fun)
     return g, ch, dch, E, cost
+
+# ================= 问题二：预测 — 决策 — 结算 三段式 =================
+VALLEY_WEEKDAYS = (4, 5)      # 实测工作日/休息日负荷形态在此处分档（周五、周六）
+
+def _norm_shape(x):
+    """归一化日形状：逐点除以日均值，均值为 0 时原样返回。"""
+    x = np.asarray(x, dtype=float)
+    m = x.mean()
+    return x / m if m > 0 else x.copy()
+
+def forecast_load(hist_load, hist_dates, target, k_shape=8, k_level=2):
+    """负载预测：同类日 EWMA 水平 × 近 k_shape 个同类日归一化形状均值。
+
+    hist_load  长 (T,144) 历史负载；hist_dates 长 T 的日期序列；target 目标日。
+    只使用 target 之前的数据，同类日按 VALLEY_WEEKDAYS 分档。
+    返回长 144 的预测负载 (kW)。
+    """
+    hist_load = np.asarray(hist_load, dtype=float)
+    hist_dates = list(hist_dates)
+    tgt_cls = target.weekday() in VALLEY_WEEKDAYS
+    idx = [i for i, d in enumerate(hist_dates)
+           if (d.weekday() in VALLEY_WEEKDAYS) == tgt_cls]
+    if len(idx) == 0:
+        idx = list(range(len(hist_dates)))
+    idx = idx[-max(k_shape, k_level):]
+    lvls = hist_load[idx].mean(axis=1)
+    k_l = min(k_level, len(idx))
+    w = np.linspace(1.0, 2.0, k_l)
+    level = float(np.average(lvls[-k_l:], weights=w))
+    shape = np.mean([_norm_shape(hist_load[i]) for i in idx[-k_shape:]], axis=0)
+    return np.maximum(level * shape, 0.0)
+
+def forecast_pv(hist_pv, hist_dates=None, target=None, k_shape=4, k_level=4):
+    """光伏预测：近 k_shape 天归一化形状均值 × 近 k_level 天日均水平的 EWMA。
+
+    光伏形态对星期不敏感，跨星期取最近若干天。返回长 144 的预测光伏 (kW)。
+    """
+    hist_pv = np.asarray(hist_pv, dtype=float)
+    k_s = min(k_shape, len(hist_pv))
+    idx = list(range(len(hist_pv) - k_s, len(hist_pv)))
+    shape = np.mean([_norm_shape(hist_pv[i]) for i in idx], axis=0)
+    lvls = hist_pv[idx].mean(axis=1)
+    k_l = min(k_level, len(idx))
+    w = np.linspace(1.0, 2.0, k_l)
+    level = float(np.average(lvls[-k_l:], weights=w))
+    return np.maximum(level * shape, 0.0)
+
+def pred_residual(F, A, thr=1.0):
+    """逐点相对预测残差 (A-F)/max(F,thr)，展平返回。"""
+    F = np.asarray(F, dtype=float)
+    A = np.asarray(A, dtype=float)
+    return ((A - F) / np.maximum(F, thr)).ravel()
+
+def scenario_factors(res_load, res_pv, q=(0.1, 0.5, 0.9), fallback=(0.95, 1.0, 1.05)):
+    """由历史预测残差的经验分位数标定情景因子。
+
+    因子 f = 1 + 残差分位数；样本不足 50 时退回先验 fallback。
+    返回 (load_fac, pv_fac) 各长 3，并做安全裁剪。
+    """
+    out = []
+    for res, lo, hi in ((res_load, 0.7, 1.3), (res_pv, 0.5, 1.5)):
+        res = np.asarray(res, dtype=float)
+        res = res[np.isfinite(res)]
+        if res.size < 50:
+            f = np.asarray(fallback, dtype=float)
+        else:
+            f = 1.0 + np.percentile(res, np.asarray(q, dtype=float) * 100.0)
+        out.append(np.clip(f, lo, hi))
+    return out[0], out[1]
+
+def solve_daily_stochastic(L_fc, S_fc, price, load_fac, pv_fac, pi, e0,
+                           emerg_mult=5.0, k0=0, k1=N_INT - 1):
+    """两阶段随机 LP：0:00 一次性决定计划购电与充放电，紧急购电事后兜底。
+
+    第一阶段 g/ch/dch/E 不依赖情景；第二阶段各情景的紧急购电 δ_s 按 5 倍电价计入。
+    目标 min Σ p_k g_k dt + Σ_s π_s Σ_k 5 p_k δ_{s,k} dt
+    约束 δ_{s,k} ≥ L̂_k f^L_s − Ŝ_k f^PV_s − g_k − dch_k + ch_k（逐情景独立）
+    SOC 递推对全情景唯一，δ ≥ 0、ch/dch ≤ P_max、E 在 [E_min,E_max] 内。
+    返回 (g, ch, dch, E, exp_cost)。
+    """
+    L_fc = np.asarray(L_fc, dtype=float)[k0:k1 + 1]
+    S_fc = np.asarray(S_fc, dtype=float)[k0:k1 + 1]
+    price = np.asarray(price, dtype=float)[k0:k1 + 1]
+    load_fac = np.asarray(load_fac, dtype=float)
+    pv_fac = np.asarray(pv_fac, dtype=float)
+    pi = np.asarray(pi, dtype=float)
+    n = k1 - k0 + 1
+    ns = len(load_fac)
+    off_d = 4 * n + 1                    # δ_s 的起始列
+    nv = off_d + ns * n
+    # 变量顺序: g, ch, dch, E(0..4n), δ(off_d..)
+    c = np.zeros(nv)
+    c[:n] = price * DT
+    for s in range(ns):
+        c[off_d + s * n: off_d + (s + 1) * n] = pi[s] * emerg_mult * price * DT
+    # 不等式 δ_{s,k} + g_k + dch_k - ch_k >= L̂_k f^L_s - Ŝ_k f^SV_s
+    nr = ns * n
+    ri = np.repeat(np.arange(nr), 4)
+    base = np.tile(np.arange(n), ns)
+    ci = np.empty(nr * 4, dtype=np.int64)
+    ci[0::4] = base
+    ci[1::4] = base + n
+    ci[2::4] = base + 2 * n
+    ci[3::4] = np.arange(nr) + off_d
+    va = np.empty(nr * 4)
+    va[0::4] = -1.0
+    va[1::4] = 1.0
+    va[2::4] = -1.0
+    va[3::4] = -1.0
+    Aub = csr_matrix((va, (ri, ci)), shape=(nr, nv))
+    bub = (S_fc[None, :] * pv_fac[:, None] - L_fc[None, :] * load_fac[:, None]).ravel()
+    # SOC 等式：E_{k+1} - E_k - eta*dt*ch_k + dt/eta*dch_k = 0；首行 E_0 = e0
+    er = np.repeat(np.arange(n), 4)
+    ec = np.empty(4 * n, dtype=np.int64)
+    ec[0::4] = 3 * n + np.arange(n) + 1
+    ec[1::4] = 3 * n + np.arange(n)
+    ec[2::4] = n + np.arange(n)
+    ec[3::4] = 2 * n + np.arange(n)
+    ev = np.empty(4 * n)
+    ev[0::4] = 1.0
+    ev[1::4] = -1.0
+    ev[2::4] = -ETA * DT
+    ev[3::4] = DT / ETA
+    Aeq = csr_matrix((np.append(ev, 1.0), (np.append(er, n), np.append(ec, 3 * n))),
+                     shape=(n + 1, nv))
+    beq = np.zeros(n + 1)
+    beq[n] = float(e0)
+    lb = np.zeros(nv)
+    ub = np.full(nv, np.inf)
+    ub[n:3 * n] = PMAX
+    lb[3 * n:4 * n + 1] = EMIN
+    ub[3 * n:4 * n + 1] = EMAX
+    res = linprog(c, A_ub=Aub, b_ub=bub, A_eq=Aeq, b_eq=beq,
+                  bounds=list(zip(lb, ub)), method='highs')
+    if not res.success:
+        raise RuntimeError(f'随机LP失败: {res.message}')
+    x = res.x
+    return x[:n], x[n:2 * n], x[2 * n:3 * n], x[3 * n:4 * n + 1], float(res.fun)
+
+def settle_emergency(L_act, S_act, price, g_plan, ch_plan, dch_plan,
+                     emerg_mult=5.0, k0=0, k1=N_INT - 1):
+    """实际运行结算：按计划充放电，缺口用 5 倍电价紧急购电补足。
+
+    返回 (delta, delta_energy, plan_cost, emerg_cost)：
+    delta(kW)、delta_energy(kWh)、计划购电费（全间隔按计划量计价）、紧急购电费。
+    """
+    L_act = np.asarray(L_act, dtype=float)[k0:k1 + 1]
+    S_act = np.asarray(S_act, dtype=float)[k0:k1 + 1]
+    price = np.asarray(price, dtype=float)[k0:k1 + 1]
+    g_plan = np.asarray(g_plan, dtype=float)[k0:k1 + 1]
+    ch_plan = np.asarray(ch_plan, dtype=float)[k0:k1 + 1]
+    dch_plan = np.asarray(dch_plan, dtype=float)[k0:k1 + 1]
+    delta = np.maximum(0.0, L_act - S_act - g_plan - dch_plan + ch_plan)
+    delta_energy = delta * DT
+    plan_cost = float(np.sum(price * g_plan) * DT)
+    emerg_cost = float(np.sum(emerg_mult * price * delta) * DT)
+    return delta, delta_energy, plan_cost, emerg_cost
 
 # ---- 带违约/超额惩罚的调整 LP ----
 def solve_adjust(L, S, price, plan, e0, k0=0, k1=N_INT - 1):

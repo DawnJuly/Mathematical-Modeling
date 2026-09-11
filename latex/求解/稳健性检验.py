@@ -1,5 +1,5 @@
 # 第六章稳健性/鲁棒性检验：数据摄动 + 不同算法一致性
-# 数据摄动：对问题二全年负荷/光伏施加乘性高斯噪声，重算 2.1—12.31 购电费
+# 数据摄动：对问题二三段式（预测—随机LP—结算）全年滚动施加乘性高斯噪声，重算 2.1—12.31 购电费
 # 算法一致性：离散动态规划(DP) vs 线性规划(LP) 求解问题一单日调度
 import sys, os, time
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -12,28 +12,85 @@ price_daily, load1, pv1 = read_附件1()
 dates, load_all, pv_all = read_附件2()
 N = len(dates)
 S = 31          # 2025-02-01 索引；1月为预热期，仅统计 2.1—12.31
+PI = np.outer([0.2, 0.6, 0.2], [0.2, 0.6, 0.2]).ravel()   # 9 情景 = 3 负载 × 3 光伏
 
-def run_year_lp(load, pv):
-    """问题二全年滚动（自由末值），返回 2.1—12.31 购电费合计"""
+
+def run_year_q2(load, pv):
+    """问题二三段式全年滚动。返回 (计划购电费, 紧急购电费)（仅累计 2.1—12.31）。
+    与 问题二.py 主循环同口径：0:00 只用历史数据预测 → 9 情景两阶段随机 LP → 真值结算。"""
+    pool_L, pool_P = [], []
     carry = E0_INIT
+    plan_tot = 0.0
+    emg_tot = 0.0
+    for d in range(N):
+        if d == 0:
+            continue                                   # 1/1 无任何历史，计划置零
+        L_fc = forecast_load(load[:d], dates[:d], dates[d])
+        S_fc = forecast_pv(pv[:d])
+        fL, fP = scenario_factors(np.concatenate(pool_L) if pool_L else np.array([]),
+                                  np.concatenate(pool_P) if pool_P else np.array([]))
+        LF = np.repeat(fL, 3); SF = np.tile(fP, 3)
+        g, ch, dch, E, _ = solve_daily_stochastic(L_fc, S_fc, price_daily,
+                                                  LF, SF, PI, e0=carry)
+        _, _, plan_cost, emerg_cost = settle_emergency(load[d], pv[d], price_daily, g, ch, dch)
+        if d >= S:
+            plan_tot += plan_cost
+            emg_tot += emerg_cost
+        carry = float(E[-1])
+        pool_L.append(pred_residual(L_fc, load[d]))
+        m = S_fc > 50.0
+        if m.any():
+            pool_P.append(((pv[d] - S_fc) / np.maximum(S_fc, 1.0))[m])
+    return plan_tot, emg_tot
+
+
+def run_year_nostorage(load, pv):
+    """无储能对照：时段解耦时随机最优计划量满足 P(净负荷>g)=0.2（因边际紧急电价 5 倍），
+    g 取 9 情景净负荷的加权 80% 分位；再按真值以 5 倍电价结算缺口。返回总购电费。"""
+    pool_L, pool_P = [], []
     tot = 0.0
     for d in range(N):
-        _, _, _, E, c = solve_daily(load[d], pv[d], price_daily, e0=carry)
+        if d == 0:
+            continue
+        L_fc = forecast_load(load[:d], dates[:d], dates[d])
+        S_fc = forecast_pv(pv[:d])
+        fL, fP = scenario_factors(np.concatenate(pool_L) if pool_L else np.array([]),
+                                  np.concatenate(pool_P) if pool_P else np.array([]))
+        LF = np.repeat(fL, 3); SF = np.tile(fP, 3)
+        net = L_fc[None, :] * LF[:, None] - S_fc[None, :] * SF[:, None]   # (9,144)
+        g = np.empty(N_INT)
+        for k in range(N_INT):
+            o = np.argsort(net[:, k]); w = np.cumsum(PI[o])
+            g[k] = net[o[min(int(np.searchsorted(w, 0.8)), 8)], k]
         if d >= S:
-            tot += c
-        carry = float(E[-1])
+            tot += float(np.sum(price_daily * g) * DT)
+            gap = np.maximum(0.0, (load[d] - pv[d]) - g)
+            tot += float(np.sum(5.0 * price_daily * gap) * DT)
+        pool_L.append(pred_residual(L_fc, load[d]))
+        m = S_fc > 50.0
+        if m.any():
+            pool_P.append(((pv[d] - S_fc) / np.maximum(S_fc, 1.0))[m])
     return tot
 
+
 t0 = time.time()
-base = run_year_lp(load_all, pv_all)
-print(f'基准 LP 2.1—12.31 购电费 = {base:.2f} 元（1次全年耗时 {time.time()-t0:.1f}s）')
+plan_base, emg_base = run_year_q2(load_all, pv_all)
+base = plan_base + emg_base
+print(f'基准三段式 2.1—12.31: 计划购电费={plan_base:.2f} 紧急购电费={emg_base:.2f} '
+      f'合计={base:.2f} 元（1次全年耗时 {time.time()-t0:.1f}s）')
+
+t0 = time.time()
+nostor = run_year_nostorage(load_all, pv_all)
+print(f'无储能对照 2.1—12.31 购电费 = {nostor:.2f} 元（耗时 {time.time()-t0:.1f}s，'
+      f'相对储能方案 {100*(nostor-base)/base:+.2f}%）')
 
 # ---------- 数据摄动检验 ----------
 def perturb_run(sigma, seed):
     r = np.random.default_rng(seed)
-    L = load_all * (1.0 + r.normal(0.0, sigma, load_all.shape))
-    P = pv_all * (1.0 + r.normal(0.0, sigma, pv_all.shape))
-    return run_year_lp(L, P)
+    L = np.maximum(load_all * (1.0 + r.normal(0.0, sigma, load_all.shape)), 0.0)
+    P = np.maximum(pv_all * (1.0 + r.normal(0.0, sigma, pv_all.shape)), 0.0)
+    p, e = run_year_q2(L, P)
+    return p + e
 
 pert = {}
 for sigma, seeds in [(0.05, 6), (0.10, 3)]:
@@ -126,7 +183,8 @@ print('图6-1 已保存')
 
 # 汇总打印（供 LaTeX 表取值）
 print('\n===== 稳健性检验汇总 =====')
-print(f'base={base:.2f}')
+print(f'base={base:.2f} (计划={plan_base:.2f} 紧急={emg_base:.2f})')
+print(f'nostorage={nostor:.2f} dev={100*(nostor-base)/base:+.3f}')
 for sigma in [0.05, 0.10]:
     v = pert[sigma]
     print(f'sigma{sigma}: mean={v.mean():.2f} std={v.std():.2f} maxdev_up={100*(v.max()-base)/base:.3f} maxdev_dn={100*(v.min()-base)/base:.3f}')

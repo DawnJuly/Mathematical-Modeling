@@ -1,4 +1,6 @@
 # 问题四：波动电价下重算问题2、问题3
+# 4-2 与问题二同口径：每天 0:00 预测 — 决策 — 结算 三段式
+# 4-3 为滚动时域调整（日内 4 次预报更新）
 import sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 SOLVE = os.path.dirname(HERE)
@@ -14,18 +16,77 @@ fc = read_附件3()
 def date_key(d):
     return f'{d.year}-{d.month}-{d.day}'
 
+def merge_runs(delta, thr=1e-6):
+    """把非零紧急购电的连续间隔合并为 (起时刻, 止时刻, 电量kWh)。"""
+    labs = interval_labels(); out = []; i = 0; n = len(delta)
+    while i < n:
+        if delta[i] > thr:
+            j = i
+            while j + 1 < n and delta[j + 1] > thr:
+                j += 1
+            out.append((labs[i].split('-')[0], labs[j].split('-')[1].replace('+1', ''),
+                        float(np.sum(delta[i:j + 1]) * DT)))
+            i = j + 1
+        else:
+            i += 1
+    return out
+
 N = len(dates)
 S = 31   # 2025-02-01 索引；附件5仅要求保存 2.1—12.31，1月作为预热期，不纳入汇总统计
-# ---- 4-2: 逐日LP（波动电价） ----
+# ---- 4-2: 三段式（预测—随机规划—结算，波动电价） ----
 g42 = np.zeros((N, N_INT)); ch42 = np.zeros((N, N_INT)); dch42 = np.zeros((N, N_INT))
-E42 = np.zeros((N, N_INT + 1)); cost42 = np.zeros(N)
+dl42 = np.zeros((N, N_INT)); su42 = np.zeros((N, N_INT))
+E42 = np.zeros((N, N_INT + 1))
+plan42 = np.zeros(N); emg42 = np.zeros(N)
+Lf42 = np.full((N, N_INT), np.nan); Sf42 = np.full((N, N_INT), np.nan)
+res_pool_L, res_pool_P = [], []
+PI = np.outer([0.2, 0.6, 0.2], [0.2, 0.6, 0.2]).ravel()   # 9 情景 = 3 负载 × 3 光伏
 carry2 = E0_INIT
 for d in range(N):
-    g, ch, dch, E, c = solve_daily(load_all[d], pv_actual_all[d], price_all[d], e0=carry2)
-    g42[d], ch42[d], dch42[d], E42[d], cost42[d] = g, ch, dch, E, c
+    if d == 0:
+        # 1/1 0:00 尚无历史数据，计划量置零，储电量全天保持 6000 kWh
+        E42[d] = np.full(N_INT + 1, E0_INIT)
+        continue
+    L_fc = forecast_load(load_all[:d], dates[:d], dates[d])
+    S_fc = forecast_pv(pv_actual_all[:d])
+    fL, fP = scenario_factors(np.concatenate(res_pool_L) if res_pool_L else np.array([]),
+                              np.concatenate(res_pool_P) if res_pool_P else np.array([]))
+    LF = np.repeat(fL, 3); SF = np.tile(fP, 3)
+    g, ch, dch, E, _ = solve_daily_stochastic(L_fc, S_fc, price_all[d], LF, SF, PI, e0=carry2)
+    delta, _, plan_cost, emerg_cost = settle_emergency(load_all[d], pv_actual_all[d], price_all[d], g, ch, dch)
+    g42[d], ch42[d], dch42[d], E42[d] = g, ch, dch, E
+    dl42[d] = delta; plan42[d] = plan_cost; emg42[d] = emerg_cost
+    su42[d] = np.maximum(0.0, pv_actual_all[d] + g + dch - ch - load_all[d]) * DT
+    Lf42[d], Sf42[d] = L_fc, S_fc
     carry2 = float(E[-1])
+    res_pool_L.append(pred_residual(L_fc, load_all[d]))
+    m = S_fc > 50.0
+    if m.any():
+        res_pool_P.append(((pv_actual_all[d] - S_fc) / np.maximum(S_fc, 1.0))[m])
+cost42 = plan42 + emg42
+
+gE42 = g42 * DT; chE42 = ch42 * DT; dchE42 = dch42 * DT
+W = slice(S, N); nW = N - S
+plan_kwh = float(gE42[W].sum()); plan_fee = float(plan42[W].sum())
+emg_kwh = float(dl42[W].sum() * DT); emg_fee = float(emg42[W].sum())
+tot_fee = plan_fee + emg_fee
+n_emg_int = int((dl42[W].reshape(-1) > 1e-6).sum())
+n_emg_day = int((dl42[W].sum(axis=1) > 1e-6).sum())
+net_kwh = float((load_all[W] - pv_actual_all[W]).sum() * DT)
 print(f'4-2 波动电价全年(365天)购电费={cost42.sum():.2f} 元')
-print(f'[汇总口径] 4-2 2.1—12.31 购电费={cost42[S:].sum():.2f} 元（固定电价问题2为 12254765.72 元）')
+print(f'[计划段] 计划购电量={plan_kwh:.2f} kWh, 计划购电费={plan_fee:.2f} 元')
+print(f'[紧急段] 紧急购电量={emg_kwh:.2f} kWh, 紧急购电费={emg_fee:.2f} 元')
+print(f'[合计]   4-2 2.1—12.31 总购电费={tot_fee:.2f} 元, 日均={tot_fee / nW:.2f} 元 '
+      f'(固定电价问题2为 14382892.99 元)')
+print(f'[紧急覆盖面] 非零间隔={n_emg_int} 个 ({n_emg_int / (nW * N_INT) * 100:.2f}%), '
+      f'发生天数={n_emg_day} 天 ({n_emg_day / nW * 100:.2f}%)')
+print(f'[紧急强度] 最大功率={dl42[W].max():.2f} kW, 单日最大电量={float((dl42[W].sum(axis=1) * DT).max()):.2f} kWh')
+print(f'[储能] 2/1 0:00 SOC={E42[S, 0]:.2f}, 12/31 24:00 SOC={E42[N - 1, -1]:.2f}, '
+      f'SOC 最小={E42[W, :].min():.2f}, SOC 最大={E42[W, :].max():.2f}')
+print(f'[能量流] 净负荷={net_kwh:.2f} kWh, 放电量={float(dchE42[W].sum()):.2f} kWh, '
+      f'充电量={float(chE42[W].sum()):.2f} kWh, 弃电={float(su42[W].sum()):.2f} kWh')
+bal = net_kwh - plan_kwh - float(dchE42[W].sum()) + float(chE42[W].sum())
+print(f'[自洽校验] 净负荷-计划-放电+充电={bal:.2f} = 紧急电量({emg_kwh:.2f}) - 弃电({float(su42[W].sum()):.2f})')
 
 # ---- 4-3: 滚动（波动电价） ----
 def run_day43(d):
@@ -83,6 +144,29 @@ for sd in spec_days:
     d = idx[sd]
     print(f'  {sd}: 4-2购电费={cost42[d]:.2f}, 4-3总费用={cost43[d]:.2f}(计划{rec43[d]["plan_commit"]:.0f}+紧急{rec43[d]["emer_cost"]:.0f})')
 
+print('\n[表4-2a~d] 指定时段计划购电量(kWh)')
+for sd in spec_days:
+    d = idx[sd]; gd = gE42[d]
+    vals = [float(gd[h * 6]) for h in (10, 12, 14, 16, 18, 20)]
+    print(f'  {sd}  ' + ' '.join(f'{v:10.2f}' for v in vals)
+          + f'  全天={gd.sum():.2f} kWh, 计划费={plan42[d]:.2f} 元, '
+            f'紧急量={float(dl42[d].sum() * DT):.2f} kWh, 紧急费={emg42[d]:.2f} 元')
+
+print('\n[表4-2e~h] 指定时段充放电量(kWh)与两端储电量')
+for sd in spec_days:
+    d = idx[sd]; ce = chE42[d]; de = dchE42[d]
+    print(f'  {sd}  0:00储电量={E42[d, 0]:.2f}  24:00储电量={E42[d, -1]:.2f}')
+    for a, b in [(0, 4), (4, 8), (8, 12), (12, 16), (16, 20), (20, 24)]:
+        k0, k1 = a * 6, b * 6 - 1
+        print(f'    {a:02d}:00-{b:02d}:00  充电量={ce[k0:k1 + 1].sum():9.2f}  放电量={de[k0:k1 + 1].sum():9.2f}')
+
+print('\n[表4-2i] 指定日期紧急购电时段与电量')
+for sd in spec_days:
+    d = idx[sd]; runs = merge_runs(dl42[d])
+    print(f'  {sd}: 合计 {float(dl42[d].sum() * DT):.2f} kWh, 共 {len(runs)} 段')
+    for a, b, e in runs:
+        print(f'    {a}-{b}  {e:.2f} kWh')
+
 # ---------- 出图 ----------
 t = np.arange(144) / 6.0
 C1, C2, C3, C4, C5, C6 = '#2E5FA3', '#E07B39', '#3BA272', '#C0504D', '#8A6BBE', '#D4A017'
@@ -108,14 +192,16 @@ ax.legend(fontsize=9, loc='upper right', framealpha=0.9)
 ax.text(0.01, 0.02, f'(a) {sd} 波动电价与固定电价对比', transform=ax.transAxes, fontsize=10, fontweight='bold')
 save_fig(fig, '图4-1_波动与固定电价对比')
 
-# 图4-2 波动电价四季典型日购电策略（4-2）
+# 图4-2 波动电价四季典型日购电策略（4-2，计划+紧急 叠加）
 fig, axes = plt.subplots(1, 4, figsize=(15.6, 4.6))
 for ax, sd_, col in zip(axes, spec_days, [C1, C3, C4, C2]):
     d = idx[sd_]
-    ax.bar(t, g42[d], width=0.14, color=col, alpha=0.85, edgecolor='black', lw=0.5)
+    ax.bar(t, g42[d], width=0.14, color=col, alpha=0.85, edgecolor='black', lw=0.4, label='计划')
+    ax.bar(t, dl42[d], bottom=g42[d], width=0.14, color=C5, alpha=0.9, edgecolor='black', lw=0.4, label='紧急')
     ax.set_xticks(np.arange(0, 25, 6)); style_ax(ax, '小时', '购电 (kW)')
-    ax.set_ylim(0, g42[d].max() * 1.12)
+    ax.set_ylim(0, max(g42[d].max(), (g42[d] + dl42[d]).max()) * 1.18)
     ax.text(0.03, 0.02, f'({sd_[5:]})', transform=ax.transAxes, fontsize=9, fontweight='bold')
+axes[0].legend(fontsize=8, loc='upper left', framealpha=0.9)
 save_fig(fig, '图4-2_波动电价四季典型日购电')
 
 # 图4-3 波动电价滚动调整购电量（4-3）
@@ -150,7 +236,7 @@ save_fig(fig, '图4-5_波动电价紧急购电量')
 # 图4-6 固定vs波动电价费用对比（2.1—12.31）
 fig, axes = plt.subplots(1, 2, figsize=(13.6, 5.0))
 ax = axes[0]
-fixed = [12254765.72, 14337999.15]   # 固定电价下问题2/问题3 的 2.1—12.31 汇总
+fixed = [14382892.99, 14337999.15]   # 固定电价下问题2/问题3 的 2.1—12.31 汇总
 fluc = [cost42[S:].sum(), cost43[S:].sum()]
 x = np.arange(2)
 w = 0.35
@@ -164,12 +250,9 @@ style_ax(ax, None, '2.1—12.31购电费 (万元)')
 ax.legend(fontsize=9, loc='upper left', framealpha=0.9)
 ax.text(0.02, 0.02, '(a) 固定/波动电价2.1—12.31费用', transform=ax.transAxes, fontsize=10, fontweight='bold')
 ax = axes[1]
-em_fixed = sum(rec43[d]['emer_cost'] for d in range(N))  # 占位，改为固定电价问题3紧急费用近似
-# 重新读固定电价问题3的紧急费用：用现有结果近似对比月度购电费
-mfix = []; mflu = []
+mflu = []
 for m in range(1, 12):
     dd = [d for d in range(N) if dates[d].month == m + 1]
-    mfix.append(0)  # 固定电价问题3月度费用（无缓存，这里用4-3近似）
     mflu.append(cost43[dd].sum() / 1e4)
 ax.bar(np.arange(11), mflu, color=get_colors('tab20', 11), edgecolor='black', lw=0.6)
 ax.set_xticks(np.arange(11)); ax.set_xticklabels([f'{m+1}月' for m in range(1, 12)], fontsize=9)
@@ -186,7 +269,7 @@ ws = wb.active; ws.title = '计划购电量'
 ws.append(['日期\\时间'] + labs + ['全天购电量', '全天购电费'])
 for d in range(start, N):
     gE = g42[d] * DT
-    ws.append([dates[d]] + [round(float(x), 4) for x in gE] + [round(float(gE.sum()), 4), round(float(cost42[d]), 4)])
+    ws.append([dates[d]] + [round(float(x), 4) for x in gE] + [round(float(gE.sum()), 4), round(float(plan42[d]), 4)])
 ws2 = wb.create_sheet('充放电量')
 ws2.append(['日期', '时间段', '充电量', '放电量', '时刻', '储电量'])
 for d in range(start, N):
@@ -201,9 +284,11 @@ for d in range(start, N):
         else:
             ws2.append([None, f'{a:02d}:00-{b:02d}:00', cq, dq, None, None])
 ws3 = wb.create_sheet('紧急购电量')
-ws3.append(['日期', '购电时间段', '购电量'])
+ws3.append(['日期', '紧急购电时间段', '紧急购电量'])
 for d in range(start, N):
-    ws3.append([dates[d], None, 0.0])
+    runs = merge_runs(dl42[d])
+    for i, (a, b, e) in enumerate(runs):
+        ws3.append([dates[d] if i == 0 else None, f'{a}-{b}', round(e, 4)])
 wb.save(os.path.join(ROOT_OUT, 'result4-2.xlsx'))
 wb.save(os.path.join(OUT_DIR, 'result4-2.xlsx'))
 print('已保存 result4-2.xlsx → 求解/结果/ 与 问题四/结果/')
