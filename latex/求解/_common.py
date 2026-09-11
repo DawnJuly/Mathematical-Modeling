@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 logging.getLogger('matplotlib').setLevel(logging.ERROR)  # 抑制findfont警告
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)  # 抑制字体管理器警告
 
-# ★ 统一绘图类导入中枢：一次性提供常用 matplotlib 类/子模块，
+# * 统一绘图类导入中枢：一次性提供常用 matplotlib 类/子模块，
 #   使脚本只写 `from _common import *` 即可直接用，无需各自重复 import（防止遗漏导致 NameError）。
 import matplotlib.ticker as mticker
 import scipy.stats as stats
@@ -77,7 +77,7 @@ plt.rcParams['savefig.dpi'] = 220
 plt.rcParams['savefig.bbox'] = 'tight'
 plt.rcParams['pdf.fonttype'] = 42
 
-# ★ 兼容层：monkey-patch 旧 API，防止 agent 用 plt.cm.get_cmap() 报错
+# * 兼容层：monkey-patch 旧 API，防止 agent 用 plt.cm.get_cmap() 报错
 if not hasattr(matplotlib.cm, 'get_cmap'):
     matplotlib.cm.get_cmap = lambda name, n=None: plt.colormaps[name].resampled(n) if n else plt.colormaps[name]
 try:
@@ -90,7 +90,7 @@ OUT_DIR = os.path.join(BASE_DIR, '结果')
 os.makedirs(FIG_DIR, exist_ok=True)
 os.makedirs(OUT_DIR, exist_ok=True)
 
-# ★ 数据目录：在脚本目录的若干级祖先及其一级子目录中探测含 附件1.xlsx 的 附件/ 或 数据/
+# * 数据目录：在脚本目录的若干级祖先及其一级子目录中探测含 附件1.xlsx 的 附件/ 或 数据/
 def _find_data_dir():
     import glob as _glb
     _cands = []
@@ -107,7 +107,7 @@ def _find_data_dir():
 
 DATA_DIR = _find_data_dir()
 
-# ★ 结果总目录：求解/结果/（跨问题汇总，供论文附录与交付使用；不写入原始附件目录）
+# * 结果总目录：求解/结果/（跨问题汇总，供论文附录与交付使用；不写入原始附件目录）
 ROOT_OUT = os.path.join(SOLVE_DIR, '结果')
 os.makedirs(ROOT_OUT, exist_ok=True)
 
@@ -140,7 +140,7 @@ def save_dual(fig, name_cn, dpi=300, bw=False):
         except Exception:
             fig.savefig(bw_path, dpi=dpi, bbox_inches='tight', facecolor='white')
         print(f'  已保存: {name_cn}_bw.png')
-        print(f'  ★ 双版本完成: {name_cn}')
+        print(f'  * 双版本完成: {name_cn}')
     plt.close(fig)
 
 def save_csv(df, name_cn):
@@ -259,7 +259,7 @@ def latex_includegraphics(png_path, caption, label, pair=False, float_pos='ht'):
         f"\\end{{figure}}"
     )
 
-# ★ 数据清洗辅助（避免 "--" 等非数值导致 min/max/idxmax 报错）
+# * 数据清洗辅助（避免 "--" 等非数值导致 min/max/idxmax 报错）
 def numeric_clean(s, default=None):
     """将列安全转为数值：非数值元素→NaN；default 不为 None 时用 default 填充NaN。
     用法：df['评分'] = numeric_clean(df['评分'])   # 先转数值（NaN保留）

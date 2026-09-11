@@ -58,7 +58,7 @@ def read_附件4():
     return dates, price
 
 def read_附件3():
-    """返回 dict: {date: {T: f[24]}}，T∈{0,6,12,18}，f=未来24小时整点光伏预报(kW)"""
+    """返回 dict: {date: {T: f[24]}}，T in {0,6,12,18}，f=未来24小时整点光伏预报(kW)"""
     p = os.path.join(_data_dir(), '附件3.xlsx')
     df = pd.read_excel(p, sheet_name='Sheet1')
     df.columns = [str(c).strip() for c in df.columns]
@@ -79,7 +79,7 @@ def read_附件3():
 # ---- 光伏预报小时值 -> 10分钟间隔功率 ----
 def forecast_10min(T, f, k0=0, k1=N_INT - 1):
     """按时刻T发布的预报 f[24]（f[i]=T+(i+1)小时的整点功率），
-    线性插值到间隔 k∈[k0,k1] 的功率(kW)。间隔k对应时间(k+1)/6小时（间隔末端）。"""
+    线性插值到间隔 k in [k0,k1] 的功率(kW)。间隔k对应时间(k+1)/6小时（间隔末端）。"""
     hours = np.arange(T, T + 25, dtype=float)          # T, T+1, ..., T+24
     vals = np.concatenate(([f[0]], f))                  # 当前整点用预报1小时近似
     ts = (np.arange(k0, k1 + 1, dtype=float) + 1.0) / 6.0   # 间隔末端时刻(小时)
