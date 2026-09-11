@@ -1,0 +1,68 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.2.3.模型建立.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题二，本节在问题一线性规划模型基础上，将单日优化扩展为全年逐日滚动优化，并引入紧急购电费用。具体过程如下。
+
+\textbf{步骤1：逐日优化模型}
+
+对第 $d$ 天，决策变量仍为购电功率 $g_{d,k}$、充电功率 $c_{d,k}$、放电功率 $d_{d,k}$ 与储电量 $E_{d,k}$。该日优化目标为：
+\begin{equation}
+    \min \; Z_d=\sum_{k=0}^{143} g_{d,k}\,p_k\,\Delta t
+\end{equation}
+其中，$p_k$ 为附件一给出的与日期无关的分时电价。功率平衡约束与储能状态递推约束分别为：
+\begin{equation}
+    g_{d,k}+S_{d,k}+d_{d,k}-c_{d,k}\geq L_{d,k}
+\end{equation}
+\begin{equation}
+    E_{d,k+1}=E_{d,k}+\eta\,c_{d,k}\,\Delta t-\frac{1}{\eta}\,d_{d,k}\,\Delta t
+\end{equation}
+容量与功率约束同问题一，即 $E_{\min}\leq E_{d,k}\leq E_{\max}$，$0\leq c_{d,k},d_{d,k}\leq P_{\max}$，$g_{d,k}\geq 0$。
+
+\textbf{步骤2：日间储电量传递}
+
+与问题一不同，问题二不再要求储电量在 0:00 与 24:00 相等，而是要求储电量在全年范围内连续传递。设第 $d$ 天的初值与末值分别为 $E_{d,0}$ 与 $E_{d,144}$，则相邻日的衔接关系为：
+\begin{equation}
+    E_{d+1,0}=E_{d,144},\quad d=0,1,\dots,363
+\end{equation}
+首日初值由附录一给定：
+\begin{equation}
+    E_{0,0}=6000
+\end{equation}
+由于每日电价相同，充放电存在约 $19\%$ 的往返损耗，最优解自然将每日末储电量放至下限附近，实现日内低充高放的套利最大化利用\cite{sioshansi2010}。
+
+\textbf{步骤3：紧急购电费用}
+
+问题二要求微网提供的电能不得低于小区负载，若低于负载则须以交易时刻电价 5 倍的价格向外网紧急购电。设第 $d$ 天第 $k$ 个间隔的实际供电缺口为 $\delta_{d,k}$，则：
+\begin{equation}
+    \delta_{d,k}=\max\{L_{d,k}-(g_{d,k}+S_{d,k}+d_{d,k}-c_{d,k}),\,0\}
+\end{equation}
+紧急购电费用为：
+\begin{equation}
+    Z^{\mathrm{em}}_d=\sum_{k=0}^{143} 5\,p_k\,\delta_{d,k}\,\Delta t
+\end{equation}
+由于本问在规划时已知附件二的真实负载与光伏，最优计划能够保证每个间隔供电不低于负载，因此 $\delta_{d,k}=0$，紧急购电费用为零，该机制主要作为问题三中预报偏差情形下的安全兜底。
+
+\textbf{步骤4：全年总费用}
+
+综上，问题二的全年总购电费用为各日购电费用与紧急购电费用之和：
+\begin{equation}
+    \min \; Z=\sum_{d=0}^{364}Z_d+\sum_{d=0}^{364}Z^{\mathrm{em}}_d
+\end{equation}
+\begin{equation}
+    \mathrm{s.t.}\quad g_{d,k}+S_{d,k}+d_{d,k}-c_{d,k}\geq L_{d,k}
+\end{equation}
+\begin{equation}
+    E_{d,k+1}=E_{d,k}+\eta\,c_{d,k}\,\Delta t-\frac{1}{\eta}\,d_{d,k}\,\Delta t
+\end{equation}
+\begin{equation}
+    E_{\min}\leq E_{d,k}\leq E_{\max},\quad 0\leq c_{d,k},d_{d,k}\leq P_{\max},\quad g_{d,k}\geq 0
+\end{equation}
+\begin{equation}
+    E_{d+1,0}=E_{d,144},\quad E_{0,0}=6000
+\end{equation}
+该模型按天递推求解 365 次，每次求解一个含 577 个变量的线性规划，既保证了计算的高效性，又通过储电量的逐日传递实现了全年尺度的协调优化。
+
+综上所述，本节完成了问题二模型的建立，将单日线性规划推广为全年逐日滚动优化，并建立了紧急购电费用的惩罚机制，接下来将基于此进行求解。

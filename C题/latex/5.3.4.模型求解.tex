@@ -1,0 +1,271 @@
+
+% ════════════════════════════════════════════
+% 模型求解（5.3.4.模型求解.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{模型求解}
+
+基于上述模型，本节利用附件一至附件三数据在滚动时域内顺序求解四个线性规划。同样以 1 月为预热期、费用汇总仅统计 2 月 1 日—12 月 31 日（334 天），该口径下含调整的总购电费用为 14337999.15 元；若不引入 6:00、12:00、18:00 的调整，仅执行 0:00 计划，总费用为 14782072.51 元。可见滚动调整使购电费用降低 444073.36 元，降幅约 3.00\%。按题目要求，以表1的格式给出四个指定日期在指定时间段的计划购电量及全天计划购电量、计划购电费（表\ref{tab:结果3-1a}～表\ref{tab:结果3-1d}），以表2的格式给出储能设备在指定时间段的充放电量及0:00和24:00储电量（表\ref{tab:结果3-2a}～表\ref{tab:结果3-2d}），以表3的格式给出紧急购电量（表\ref{tab:结果3-3}）；四个指定日期的计划购电量、调整购电量与费用汇总见表\ref{tab:结果3-4}。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.3.20 微网在指定时间段的计划购电量及全天的购电量和购电费}
+  \label{tab:结果3-1a} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.3.20 微网在指定时间段的计划购电量及全天的购电量和购电费（续）} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  10:00--10:10 & 0.00 & 12:00--12:10 & 560.43 & 14:00--14:10 & 0.00 \\
+  16:00--16:10 & 663.99 & 18:00--18:10 & 698.00 & 20:00--20:10 & 0.00 \\
+  全天购电量 & 67748.70 & 全天购电费 & 41072.00 &  &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.6.21 微网在指定时间段的计划购电量及全天的购电量和购电费}
+  \label{tab:结果3-1b} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.6.21 微网在指定时间段的计划购电量及全天的购电量和购电费（续）} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  10:00--10:10 & 0.00 & 12:00--12:10 & 0.00 & 14:00--14:10 & 0.00 \\
+  16:00--16:10 & 111.20 & 18:00--18:10 & 0.00 & 20:00--20:10 & 0.00 \\
+  全天购电量 & 32640.60 & 全天购电费 & 18056.00 &  &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.9.23 微网在指定时间段的计划购电量及全天的购电量和购电费}
+  \label{tab:结果3-1c} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.9.23 微网在指定时间段的计划购电量及全天的购电量和购电费（续）} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  10:00--10:10 & 0.00 & 12:00--12:10 & 371.59 & 14:00--14:10 & 0.00 \\
+  16:00--16:10 & 636.70 & 18:00--18:10 & 764.33 & 20:00--20:10 & 0.00 \\
+  全天购电量 & 68433.20 & 全天购电费 & 42736.00 &  &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.12.21 微网在指定时间段的计划购电量及全天的购电量和购电费}
+  \label{tab:结果3-1d} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.12.21 微网在指定时间段的计划购电量及全天的购电量和购电费（续）} \\
+  \toprule
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  10:00--10:10 & 0.00 & 12:00--12:10 & 979.54 & 14:00--14:10 & 0.00 \\
+  16:00--16:10 & 799.69 & 18:00--18:10 & 715.41 & 20:00--20:10 & 0.00 \\
+  全天购电量 & 93633.20 & 全天购电费 & 59704.00 &  &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.3.20 储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \label{tab:结果3-2a} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.3.20 储能设备在指定时间段的充放电量及0:00和24:00的储电量（续）} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  0:00--4:00 & 9000.00 & 0.00 & 4:00--8:00 & 1666.67 & 6149.96 \\
+  8:00--12:00 & 4106.95 & 2313.92 & 12:00--16:00 & 6651.73 & 250.65 \\
+  16:00--20:00 & 0.00 & 5709.78 & 20:00--24:00 & 0.00 & 2930.22 \\
+  0:00储电量 & 1200.00 &  & 24:00储电量 & 1200.00 &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.6.21 储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \label{tab:结果3-2b} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.6.21 储能设备在指定时间段的充放电量及0:00和24:00的储电量（续）} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  0:00--4:00 & 1409.41 & 0.00 & 4:00--8:00 & 850.39 & 1830.44 \\
+  8:00--12:00 & 1812.59 & 0.00 & 12:00--16:00 & 8722.90 & 0.00 \\
+  16:00--20:00 & 131.18 & 6154.10 & 20:00--24:00 & 0.00 & 2485.90 \\
+  0:00储电量 & 1200.00 &  & 24:00储电量 & 1200.00 &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.9.23 储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \label{tab:结果3-2c} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.9.23 储能设备在指定时间段的充放电量及0:00和24:00的储电量（续）} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  0:00--4:00 & 9000.00 & 0.00 & 4:00--8:00 & 1666.67 & 6435.18 \\
+  8:00--12:00 & 5210.49 & 1920.52 & 12:00--16:00 & 5495.20 & 315.91 \\
+  16:00--20:00 & 0.00 & 5602.91 & 20:00--24:00 & 0.00 & 3037.09 \\
+  0:00储电量 & 1200.00 &  & 24:00储电量 & 1200.00 &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
+  \caption{2025.12.21 储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \label{tab:结果3-2d} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endfirsthead
+  \caption{2025.12.21 储能设备在指定时间段的充放电量及0:00和24:00的储电量（续）} \\
+  \toprule
+  时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  0:00--4:00 & 9000.00 & 0.00 & 4:00--8:00 & 2499.34 & 1510.13 \\
+  8:00--12:00 & 5833.33 & 7579.05 & 12:00--16:00 & 7558.00 & 2432.26 \\
+  16:00--20:00 & 0.00 & 5797.47 & 20:00--24:00 & 0.00 & 2842.53 \\
+  0:00储电量 & 1200.00 &  & 24:00储电量 & 1200.00 &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}}
+  \caption{微网在指定日期的紧急购电量}
+  \label{tab:结果3-3} \\
+  \toprule
+  \multicolumn{2}{c}{2025.3.20} & \multicolumn{2}{c}{2025.6.21} & \multicolumn{2}{c}{2025.9.23} & \multicolumn{2}{c}{2025.12.21} \\
+  \cmidrule(lr){1-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endfirsthead
+  \caption{微网在指定日期的紧急购电量（续）} \\
+  \toprule
+  \multicolumn{2}{c}{2025.3.20} & \multicolumn{2}{c}{2025.6.21} & \multicolumn{2}{c}{2025.9.23} & \multicolumn{2}{c}{2025.12.21} \\
+  \cmidrule(lr){1-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+  时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  06:00--12:00 & 2497.25 & 04:00--04:50 & 2.34 & 06:00--06:50 & 692.04 & 07:00--08:10 & 67.18 \\
+  12:30--14:20 & 545.00 & 05:00--05:30 & 12.59 & 07:10--08:00 & 61.88 & 08:50--12:00 & 829.59 \\
+  14:40--15:10 & 35.16 & 06:00--06:10 & 140.85 & 08:10--09:00 & 64.49 & 13:00--13:10 & 2.28 \\
+  15:20--16:20 & 119.81 & 06:20--07:20 & 360.87 & 09:50--10:20 & 46.53 & 16:30--16:50 & 13.69 \\
+  16:50--17:50 & 77.14 & 13:00--13:10 & 1.48 & 10:40--11:00 & 48.04 &  &  \\
+   &  & 16:00--16:20 & 5.78 & 11:40--12:00 & 57.68 &  &  \\
+   &  & 17:20--17:30 & 0.50 & 12:50--14:00 & 121.33 &  &  \\
+   &  & 19:00--19:50 & 2.58 & 14:20--15:00 & 92.64 &  &  \\
+   &  &  &  & 15:50--16:30 & 24.37 &  &  \\
+   &  &  &  & 17:00--17:50 & 64.93 &  &  \\
+\end{longtable}
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.17\textwidth}>{\centering\arraybackslash}p{0.17\textwidth}>{\centering\arraybackslash}p{0.17\textwidth}>{\centering\arraybackslash}p{0.16\textwidth}>{\centering\arraybackslash}p{0.16\textwidth}}
+  \caption{问题三指定日期的计划购电量、调整购电量与费用汇总}
+  \label{tab:结果3-4} \\
+  \toprule
+  日期 & 计划购电量 & 调整购电量 & 计划费用 & 紧急费用 \\
+  \midrule
+  \endfirsthead
+  \caption{问题三指定日期的计划购电量、调整购电量与费用汇总（续）} \\
+  \toprule
+  日期 & 计划购电量 & 调整购电量 & 计划费用 & 紧急费用 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  2025.3.20 & 67748.70 & 63217.60 & 41072.00 & 12856.00 \\
+  2025.6.21 & 32640.60 & 33140.10 & 18056.00 & 2294.00 \\
+  2025.9.23 & 68433.20 & 65716.30 & 42736.00 & 5600.00 \\
+  2025.12.21 & 93633.20 & 93783.50 & 59704.00 & 2875.00 \\
+\end{longtable}
+
+计划购电与滚动调整后购电功率的对比（以 9 月 23 日为例）如图\ref{fig:结果3-2}所示。可以看到，调整后购电功率在白天光伏预报偏高的时段被明显下调，减少了高价时段的无效购电；在预报偏低的时段则小幅上调，使实际供电缺口显著缩小。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{求解/问题三/图片/图3-2_计划与调整购电量对比.png}
+    \caption{典型日计划购电与调整购电功率对比}
+    \label{fig:结果3-2}
+\end{figure}
+
+由调整后策略生成的 2.1—12.31 逐日紧急购电量如图\ref{fig:结果3-3}所示。紧急购电量在多数日期维持在较低水平，仅在实际供电出现缺口的个别日期出现尖峰，说明滚动调整已有效吸收了大部分预报误差，使实际供电缺口显著缩小。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{求解/问题三/图片/图3-3_全年紧急购电量.png}
+    \caption{2.1—12.31逐日紧急购电量}
+    \label{fig:结果3-3}
+\end{figure}
+
+有无调整的费用对比与月度节省如图\ref{fig:结果3-4}所示。引入滚动调整后，总费用由 14782072.51 元降至 14337999.15 元，各月均有不同程度的费用节省，说明利用 6:00、12:00、18:00 的新预报进行购电调整具有明确的经济收益。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{求解/问题三/图片/图3-4_有无调整费用对比.png}
+    \caption{有无滚动调整的费用对比与月度节省（2.1—12.31）}
+    \label{fig:结果3-4}
+\end{figure}
+
+典型日的储能荷电状态在计划与调整后两种策略下的对比如图\ref{fig:结果3-5}所示。调整后储能充放电轨迹随更新预报自适应变化，荷电状态全程维持在约束区间内，且 0:00 与 24:00 的储电量仍保持合理衔接，说明调整策略在提升经济性的同时未破坏储能的运行约束。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{求解/问题三/图片/图3-5_计划与调整后SOC对比.png}
+    \caption{典型日计划与调整后储能荷电状态对比}
+    \label{fig:结果3-5}
+\end{figure}
+
+2—12 月费用的月度构成如图\ref{fig:结果3-6}所示，计划购电费用占主导，调整相关费用与紧急购电费用占比相对较小，且冬季总费用最高、夏季最低，与负荷和光伏的季节特性一致。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{求解/问题三/图片/图3-6_全年费用构成.png}
+    \caption{2.1—12.31费用月度构成}
+    \label{fig:结果3-6}
+\end{figure}
+
+为完整回答“是否需要引入其他时刻的预报”这一问，本文在 0/6/12/18 方案基础上进一步做了两类边际收益分析（口径均为 2 月 1 日—12 月 31 日）。第一类为逐次累加题目给定的真实预报时刻：仅用 0:00 计划时费用为 14782072.51 元；依次引入 6:00、12:00、18:00 调整后，费用分别变为 14819461.95 元、14357950.79 元与 14337999.15 元，三个时刻的边际节省分别为 $-3.74$ 万元、$46.15$ 万元与 $2.00$ 万元，其中 12:00 预报的价值最为突出（6:00 预报单独引入时边际收益略为负值，说明并非所有新增预报时刻都具有正收益）。第二类为“加密更多时刻”的上界分析：由于附件三只提供 0:00、6:00、12:00、18:00 四个时刻的预报，本文以“各时刻预报完全准确（完全预见）”作为最乐观假设，考察把调整间隔由 6 小时加密到 3 小时、1 小时，以及在 6 小时方案中增加 9:00、15:00 时刻的额外收益，结果如图\ref{fig:结果3-7}所示。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{求解/问题三/图片/图3-7_其他时刻预报边际收益.png}
+    \caption{不同调整时刻方案的总费用与各新增时刻的边际节省（2.1—12.31）}
+    \label{fig:结果3-7}
+\end{figure}
+
+在完全预见下，6 小时间隔已几乎捕获全部频率收益：把间隔进一步加密到 3 小时、1 小时仅分别再节省 5.12 万元与 0.05 万元，而在 6 小时方案中增加 9:00、15:00 时刻的边际收益为 0；与之相对，若保持 6 小时间隔不变、仅把 6/12/18 的真实预报替换为完全预见，费用还可再降 171.33 万元。这说明未实现的节省潜力主要来自光伏预报精度而非调整频率。
+
+综合以上结果：引入 6:00、12:00、18:00 的预报制定调整购电策略是必要的，可使购电费用较仅用 0:00 计划降低约 3.00\%；但进一步引入更多预报时刻（如每小时、每 3 小时，或增加 9:00、15:00 等）并无必要——即使在完全预见的最乐观假设下，加密调整间隔的边际收益也趋近于零（0.05 万～5.12 万元量级）。因此，若需进一步降低购电费用，应优先提高各预报时刻的预报精度，而非增加预报时刻数量。

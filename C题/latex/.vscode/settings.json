@@ -1,0 +1,43 @@
+{
+  "latex-workshop.latex.recipe.default": "latexmk (xelatex)",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk (xelatex)",
+      "tools": ["latexmk-xelatex"]
+    },
+    {
+      "name": "xelatex",
+      "tools": ["xelatex"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk-xelatex",
+      "command": "latexmk",
+      "args": [
+        "-xelatex",
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    },
+    {
+      "name": "xelatex",
+      "command": "xelatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    }
+  ],
+  "latex-workshop.latex.outDir": "%DIR%",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "workbench.editorAssociations": {
+    "*.pdf": "cweijan.officeViewer"
+  }
+}

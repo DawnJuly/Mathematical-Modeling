@@ -1,0 +1,97 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.3.3.模型建立.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题三，本节建立滚动时域下的计划购电与调整购电模型，并对计划与调整之间的偏差费用进行分段线性刻画。具体过程如下。
+
+\textbf{步骤1：0:00 计划购电策略}
+
+在 0:00，微网依据当日 0:00 发布的光伏预报制定全天计划购电策略。设计划购电功率为 $g^{\mathrm{p}}_k$，则计划模型为：
+\begin{equation}
+    \min \; Z^{\mathrm{p}}=\sum_{k=0}^{143} g^{\mathrm{p}}_k\,p_k\,\Delta t
+\end{equation}
+\begin{equation}
+    \mathrm{s.t.}\quad g^{\mathrm{p}}_k+S^{0}_k+d^{\mathrm{p}}_k-c^{\mathrm{p}}_k\geq L_k
+\end{equation}
+\begin{equation}
+    E^{\mathrm{p}}_{k+1}=E^{\mathrm{p}}_k+\eta\,c^{\mathrm{p}}_k\,\Delta t-\frac{1}{\eta}\,d^{\mathrm{p}}_k\,\Delta t
+\end{equation}
+\begin{equation}
+    E_{\min}\leq E^{\mathrm{p}}_k\leq E_{\max},\quad 0\leq c^{\mathrm{p}}_k,d^{\mathrm{p}}_k\leq P_{\max}
+\end{equation}
+其中，$S^{0}_k$ 为 0:00 预报功率，$E^{\mathrm{p}}_0$ 为当日初始储电量，$E^{\mathrm{p}}_{144}$ 自由。
+
+\textbf{步骤2：调整购电的偏差费用}
+
+在后续预报时刻 $\tau\in\{6,12,18\}$，微网可对尚未执行的时段进行购电调整。设调整后购电功率为 $g^{\mathrm{a}}_k$，计划购电量高于调整购电量的部分按交易电价的 $50\%$ 计违约费用，调整购电量高于计划购电量的部分按交易电价的 $1.5$ 倍计价，则第 $k$ 个间隔的购电费用为：
+\begin{equation}
+    C_k=\Big[\min\{g^{\mathrm{p}}_k,g^{\mathrm{a}}_k\}+0.5\max\{g^{\mathrm{p}}_k-g^{\mathrm{a}}_k,0\}+1.5\max\{g^{\mathrm{a}}_k-g^{\mathrm{p}}_k,0\}\Big]p_k\Delta t
+\end{equation}
+其中，第一项 $\min\{g^{\mathrm{p}}_k,g^{\mathrm{a}}_k\}$ 为计划购电费用，按\textbf{实际执行的购电量}结算，即计划购电量与调整购电量中的较小者，而非按计划购电量全额结算；第二、三项为调整购电量的相关费用。上式等价于如下分段形式：
+\[
+\frac{C_k}{p_k\Delta t}=
+\begin{cases}
+0.5\,g^{\mathrm{p}}_k+0.5\,g^{\mathrm{a}}_k, & g^{\mathrm{a}}_k\leq g^{\mathrm{p}}_k,\\[6pt]
+1.5\,g^{\mathrm{a}}_k-0.5\,g^{\mathrm{p}}_k, & g^{\mathrm{a}}_k\geq g^{\mathrm{p}}_k.
+\end{cases}
+\]
+下调购电时（$g^{\mathrm{a}}_k<g^{\mathrm{p}}_k$），左段可拆为 $g^{\mathrm{a}}_k+0.5\,(g^{\mathrm{p}}_k-g^{\mathrm{a}}_k)$：实际购电部分按 $1$ 倍电价结算，未执行的差额部分按 $0.5$ 倍计违约费；上调购电时（$g^{\mathrm{a}}_k>g^{\mathrm{p}}_k$），右段可拆为 $g^{\mathrm{p}}_k+1.5\,(g^{\mathrm{a}}_k-g^{\mathrm{p}}_k)$：计划内部分按 $1$ 倍电价结算，超出部分按 $1.5$ 倍电价加价。因此 $C_k$ 关于 $g^{\mathrm{a}}_k$ 是分段线性凸函数，在 $g^{\mathrm{a}}_k=g^{\mathrm{p}}_k$ 处连续，两段斜率分别为 $0.5p_k\Delta t$ 与 $1.5p_k\Delta t$，其函数图像如下图所示。
+\begin{center}
+\begin{tikzpicture}[>=Stealth, x=2.1cm, y=1.15cm]
+  \draw[->] (-0.15,0) -- (2.75,0) node[below] {\small $g^{\mathrm{a}}_k/g^{\mathrm{p}}_k$};
+  \draw[->] (0,-0.35) -- (0,3.25) node[left] {\small $\dfrac{C_k}{p_k\Delta t\,g^{\mathrm{p}}_k}$};
+  \draw[thick, blue] (0,0.5) -- (1,1) -- (2,2.5);
+  \draw[dashed, gray] (1,0) -- (1,1);
+  \fill[red] (1,1) circle (1.6pt);
+  \node[above right, red] at (1,1) {$g^{\mathrm{a}}_k=g^{\mathrm{p}}_k$};
+  \foreach \x in {0,1,2} \draw (\x,0.06) -- (\x,-0.06) node[below] {\small $\x$};
+  \foreach \y/\l in {0.5/0.5,1/1,2/2,2.5/2.5} \draw (0.06,\y) -- (-0.06,\y) node[left] {\small $\l$};
+  \node[blue] at (0.32,1.0) {斜率 $0.5$};
+  \node[blue] at (1.68,2.12) {斜率 $1.5$};
+\end{tikzpicture}
+
+{\bfseries 分段购电费用随调整购电量的变化（$g^{\mathrm{p}}_k$ 固定）}
+\end{center}
+
+\textbf{费用口径说明}：题目原文指出“总的购电费用包括计划购电费用、紧急购电费用和调整购电量的相关费用”。若将“计划购电费用”理解为按计划购电量全额结算，则下调购电时会出现重复计费：当 $g^{\mathrm{a}}_k=0$ 时用户未购任何电量却仍须支付 $1.5\,g^{\mathrm{p}}_k p_k\Delta t$，与“违约费仅针对未执行部分”的经济含义相悖。因此本文采用实际购电量结算口径：基础电费只按实际购电量 $\min\{g^{\mathrm{p}}_k,g^{\mathrm{a}}_k\}$ 结算，未执行的差额部分按 $0.5$ 倍计违约费、超出部分按 $1.5$ 倍计价，从而保证“购多少电、付多少钱，偏差部分单独计价”的费用闭合性。
+
+\textbf{步骤3：分段费用的上境线性化}
+
+为保持线性规划结构，引入上境变量 $w_k$，令其不小于分段费用的两段线性上界：
+\begin{equation}
+    w_k\geq 0.5\,p_k\Delta t\,(g^{\mathrm{a}}_k+g^{\mathrm{p}}_k)
+\end{equation}
+\begin{equation}
+    w_k\geq 1.5\,p_k\Delta t\,g^{\mathrm{a}}_k-0.5\,p_k\Delta t\,g^{\mathrm{p}}_k
+\end{equation}
+由于目标为最小化 $\sum_k w_k$，最优解中 $w_k$ 将精确等于两段上界的较大者，即 $w_k=C_k$。于是调整子问题在预报时刻 $\tau$ 覆盖的时段 $[\tau,24:00]$ 内最小化：
+\begin{equation}
+    \min \sum_{k=6\tau}^{143} w_k
+\end{equation}
+\begin{equation}
+    \mathrm{s.t.}\quad g^{\mathrm{a}}_k+S^{\tau}_k+d^{\mathrm{a}}_k-c^{\mathrm{a}}_k\geq L_k
+\end{equation}
+\begin{equation}
+    E^{\mathrm{a}}_{k+1}=E^{\mathrm{a}}_k+\eta\,c^{\mathrm{a}}_k\,\Delta t-\frac{1}{\eta}\,d^{\mathrm{a}}_k\,\Delta t
+\end{equation}
+连同容量、功率约束及式(33)(34)的上境约束，初始储电量 $E^{\mathrm{a}}_{6\tau}$ 取上一决策执行到 $\tau$ 时刻的储电量。
+
+\textbf{步骤4：紧急购电费用与全年总费用}
+
+设滚动调整后最终执行的购电功率为 $g^{\mathrm{a}}_k$，最终放电、充电功率分别为 $d^{\mathrm{a}}_k$、$c^{\mathrm{a}}_k$，实际光伏功率为 $S^{\mathrm{r}}_k$。紧急购电的本质是实际供电不足负载的缺口，即：
+\begin{equation}
+    \delta_k=\max\Big\{L_k-\big(g^{\mathrm{a}}_k+S^{\mathrm{r}}_k+d^{\mathrm{a}}_k-c^{\mathrm{a}}_k\big),\,0\Big\}
+\end{equation}
+该式表示：在最终调整策略执行后，实际光伏与充放电均按最终计划落实，微网供电仍不能满足负载的部分才需以 5 倍电价向外网紧急购电。特别地，若最终预报功率 $S^{\mathrm{u}}_k$（由 0:00、6:00、12:00、18:00 各时段最终决策分段拼接得到）下的功率平衡取等号，即 $g^{\mathrm{a}}_k+S^{\mathrm{u}}_k+d^{\mathrm{a}}_k-c^{\mathrm{a}}_k=L_k$，则上式退化为 $\delta_k=\max\{S^{\mathrm{u}}_k-S^{\mathrm{r}}_k,0\}$，此时缺口才近似等于最终光伏预报与实际之差；一般情况下调整购电与充放电会部分弥补光伏预报偏差，故紧急购电应按实际供电缺口而非光伏预报差核算。紧急购电费用为：
+\begin{equation}
+    Z^{\mathrm{em}}_k=5\,p_k\,\delta_k\,\Delta t
+\end{equation}
+全年总购电费用为计划购电费用、调整相关费用与紧急购电费用之和：
+\begin{equation}
+    \min \; Z=\sum_{d=0}^{364}\sum_{k=0}^{143}\Big(C_{d,k}+5\,p_k\,\delta_{d,k}\Delta t\Big)
+\end{equation}
+该模型将滚动决策分解为四个顺序求解的线性规划，其思想与模型预测控制中滚动时域优化框架一致\cite{rawlings2017,parisio2014,camacho2013}，既降低了计算复杂度，又通过分段惩罚机制合理刻画了计划偏离的经济代价。
+
+综上所述，本节完成了问题三滚动调整优化模型的建立，得到了计划购电、调整购电与紧急购电三层费用结构的完整数学表达，接下来将基于此进行求解。

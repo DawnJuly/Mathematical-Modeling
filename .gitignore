@@ -25,3 +25,12 @@ C题/_tmp/
 # ---- 程序重跑在 C题/ 根目录生成的工作副本（提交版在 结果/ 与 附件/附件5/）----
 C题/result*.xlsx
 C题/q*_log.txt
+
+# ---- LaTeX 编译中间产物（latexmk 可重新生成，不提交）----
+C题/latex/*.aux
+C题/latex/*.log
+C题/latex/*.out
+C题/latex/*.fls
+C题/latex/*.fdb_latexmk
+C题/latex/*.synctex.gz
+C题/latex/*.xdv

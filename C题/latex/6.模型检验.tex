@@ -1,0 +1,63 @@
+
+% ════════════════════════════════════════
+% 模型检验与分析（06.模型检验.tex）
+% ════════════════════════════════════════
+\section{模型检验与分析}
+
+为验证本文构建的模型的有效性和稳健性，进行以下检验。本文模型为线性规划优化模型，其最优性由求解器严格保证\cite{boyd2004}，因此检验重点在于约束满足程度、能量守恒精度与参数灵敏度。
+
+\subsection{误差分析}
+
+对问题一的最优解逐项核验其约束满足情况与能量守恒精度，结果如表\ref{tab:error}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}}
+  \caption{模型误差分析结果}
+  \label{tab:error} \\
+  \toprule
+  检验项 & 检验结果 & 说明 \\
+  \midrule
+  \endfirsthead
+  \caption{模型误差分析结果（续）} \\
+  \toprule
+  检验项 & 检验结果 & 说明 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  功率平衡最大残差 & $1.36\times10^{-12}$ & 能量守恒严格满足 \\
+  储电量越界次数 & 0 & 全程处于 $[1200,10800]$ kWh \\
+  充放电功率越界次数 & 0 & 始终不超过 5000 kW \\
+  储电初值约束 & 满足 & $E_0=6000$ kWh，与附录1给定一致 \\
+  日循环约束残差 & 0 & $E_0=E_{144}=6000$ kWh \\
+\end{longtable}
+
+如表\ref{tab:error}所示，最优解的功率平衡残差处于 $10^{-12}$ 量级，储能荷电状态与充放电功率全程处于约束区间，日循环约束严格成立，验证了模型求解的正确性与数值精度。
+
+\subsection{灵敏度分析}
+
+为检验模型对关键参数的稳健性，分别调整储能充放电效率、最大充放电功率、储电量下限与负荷水平，观察全天购电费的变化，结果如表\ref{tab:sensitivity}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}}
+  \caption{灵敏度分析结果}
+  \label{tab:sensitivity} \\
+  \toprule
+  参数变化 & 输出变化 & 灵敏度评估 \\
+  \midrule
+  \endfirsthead
+  \caption{灵敏度分析结果（续）} \\
+  \toprule
+  参数变化 & 输出变化 & 灵敏度评估 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  $\eta=0.85$ & 36603.41 元 & 费用上升 4.20\% \\
+  $\eta=0.95$ & 33767.03 元 & 费用下降 3.87\% \\
+  $P_{\max}=4000$ & 35247.87 元 & 费用上升 0.34\% \\
+  $P_{\max}=6000$ & 35083.29 元 & 费用下降 0.12\% \\
+  $E_{\min}=1500$ & 35329.91 元 & 费用上升 0.58\% \\
+  负荷 $+5\%$ & 38834.17 元 & 费用上升 10.55\% \\
+  负荷 $-5\%$ & 31552.18 元 & 费用下降 10.18\% \\
+\end{longtable}
+
+如表\ref{tab:sensitivity}所示，购电费对充放电效率最为敏感，效率每提高 5\% 可使费用下降约 4\%，说明储能效率是影响经济性的关键因素；充放电功率与储电量下限的小幅变化对费用的影响均不足 1\%，模型稳健；负荷水平按比例影响费用，符合能量平衡的线性规律。综上，模型在各参数摄动下均表现稳定，结果可靠。
