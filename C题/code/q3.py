@@ -3,7 +3,6 @@
 0:00 用0:00预报做全天计划; 6:00/12:00/18:00 用最新预报重解剩余时段LP。
 对照组: 只用0:00计划交割, 缺口全部按5倍电价紧急购电。
 输出: result3.xlsx (并覆盖 附件/附件5/result3.xlsx), q3_log.txt"""
-import os
 import shutil
 import time
 import numpy as np
@@ -22,13 +21,9 @@ def log(s=''):
     L.append(s)
     print(s)
 
-# ---------- 0. 模板备份(仅首次) ----------
-BAK = BASE / '附件/附件5/templates_bak'
-if not os.path.exists(BAK):
-    os.makedirs(BAK)
-    for f in ['result3.xlsx', 'result4-2.xlsx', 'result4-3.xlsx']:
-        shutil.copy(BASE / '附件/附件5' / f, BAK / f)
-    log('模板已备份到 %s' % BAK)
+# ---------- 0. 空提交模板(原始文件, 来自 附件备份/附件5) ----------
+BAK = BASE / '附件备份/附件5'
+assert (BAK / 'result3.xlsx').exists(), '缺少空提交模板: %s' % (BAK / 'result3.xlsx')
 
 # ---------- 1. 数据 ----------
 D = load_data()

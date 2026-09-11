@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Q4: 波动电价(附件4)下重算 Q2/Q3。
 输出: result4-2.xlsx, result4-3.xlsx (并覆盖 附件/附件5/), q4_log.txt"""
-import os
 import shutil
 import time
 import numpy as np
@@ -20,8 +19,9 @@ def log(s=''):
     L.append(s)
     print(s)
 
-BAK = BASE / '附件/附件5/templates_bak'
-assert os.path.exists(BAK), '先运行 q3.py 完成模板备份'
+BAK = BASE / '附件备份/附件5'  # 空提交模板(原始文件)
+assert (BAK / 'result4-2.xlsx').exists() and (BAK / 'result4-3.xlsx').exists(), \
+    '缺少空提交模板: %s' % BAK
 
 D = load_data()
 price1, dates = D['price1'], D['dates']
