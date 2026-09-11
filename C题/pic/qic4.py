@@ -42,10 +42,12 @@ q3_f = q3_year(price1, FC, LOAD, PV, adjust=True)
 q2_v = q2_year(PRICE4)
 q3_v = q3_year(PRICE4, FC, LOAD, PV, adjust=True)
 ct_v = q3_year(PRICE4, FC, LOAD, PV, adjust=False)
+ct_f = q3_year(price1, FC, LOAD, PV, adjust=False)
 
 tot = lambda res, key: sum(res[d][key] for d in DAYS_OUT)
 q2f, q3f = tot(q2_f, 'cost'), tot(q3_f, 'total')
 q2v, q3v, ctv = tot(q2_v, 'cost'), tot(q3_v, 'total'), tot(ct_v, 'total')
+ctf = tot(ct_f, 'total')
 
 # 与 q3_log.txt / q4_log.txt 全年汇总一致性断言
 assert abs(q2f - 12254765.72) < 1.0
@@ -53,8 +55,9 @@ assert abs(q3f - 17000834.39) < 1.0
 assert abs(q2v - 12841054.36) < 1.0
 assert abs(q3v - 17742495.98) < 1.0
 assert abs(ctv - 18133711.59) < 1.0
-pr('全年汇总断言通过: Q2f %.2f Q3f %.2f | Q2v %.2f Q3v %.2f 对照v %.2f'
-   % (q2f, q3f, q2v, q3v, ctv))
+assert abs(ctf - 17400028.28) < 1.0
+pr('全年汇总断言通过: Q2f %.2f Q3f %.2f 对照f %.2f | Q2v %.2f Q3v %.2f 对照v %.2f'
+   % (q2f, q3f, ctf, q2v, q3v, ctv))
 
 four_idx = [i for i, t in enumerate(dates)
             if t.strftime('%Y-%m-%d') in FOUR_DAYS]
@@ -108,5 +111,38 @@ fig.tight_layout()
 fig.savefig(PIC / 'q4_cost_compare.png')
 plt.close(fig)
 pr('saved q4_cost_compare.png')
+
+# ============ 图7: 三方案×两种电价 全年总电费对比（6柱） ============
+fig, ax = plt.subplots(figsize=(8.6, 5.0))
+grp = ['Q2 理想情形\n(光伏已知)', 'Q3 滚动调整', 'Q3 对照组\n(仅0:00计划)']
+vf = np.array([q2f, q3f, ctf]) / 1e4
+vv = np.array([q2v, q3v, ctv]) / 1e4
+x = np.arange(3)
+w = 0.34
+b1 = ax.bar(x - w / 2, vf, width=w, color='#4878a8',
+            label='固定电价（附件1）')
+b2 = ax.bar(x + w / 2, vv, width=w, color='#e67e22',
+            label='波动电价（附件4）')
+for bs in (b1, b2):
+    for b in bs:
+        ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 12,
+                '%.2f' % b.get_height(), ha='center', fontsize=9)
+ax.text(1, vf[1] + 120,
+        '滚动较对照组省 %.2f 万元 (%.2f%%)'
+        % ((ctf - q3f) / 1e4, 100 * (ctf - q3f) / ctf),
+        ha='center', fontsize=9, color='#c0392b')
+ax.text(1 + w / 2, vv[1] + 120,
+        '%.2f%%' % (100 * (ctv - q3v) / ctv),
+        ha='center', fontsize=9, color='#c0392b')
+ax.set_xticks(x)
+ax.set_xticklabels(grp)
+ax.set_ylabel('总电费 / 万元')
+ax.set_ylim(0, vv.max() * 1.22)
+ax.set_title('问题4 三种方案在固定/波动电价下的全年总电费对比（334天）')
+ax.legend(loc='upper right', framealpha=0.9)
+fig.tight_layout()
+fig.savefig(PIC / 'q4_four_plan.png')
+plt.close(fig)
+pr('saved q4_four_plan.png')
 
 pr('ALL DONE (Q4)')

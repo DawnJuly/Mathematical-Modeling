@@ -157,4 +157,62 @@ fig.savefig(PIC / 'q3_cost_compare.png')
 plt.close(fig)
 pr('saved q3_cost_compare.png')
 
+# ============ 图5: 四个发布时刻的光伏预报误差箱线图 ============
+err_by_stage = {h0: [] for h0 in STAGES}
+for d in range(365):
+    for j, h0 in enumerate(STAGES):
+        for k in range(1, 25):
+            h_abs = h0 + k - 1
+            dd = d + h_abs // 24
+            if dd > 364:
+                continue
+            err_by_stage[h0].append(FC[d, j, k - 1] - HA[dd, h_abs % 24])
+
+fig, ax = plt.subplots(figsize=(8.2, 4.8))
+labs = ['%d:00发布' % h0 for h0 in STAGES]
+data = [np.array(err_by_stage[h0]) for h0 in STAGES]
+bp = ax.boxplot(data, labels=labs, widths=0.5, showfliers=True,
+                flierprops=dict(marker='.', ms=2, alpha=0.25,
+                                markerfacecolor='#7f8c8d',
+                                markeredgecolor='#7f8c8d'),
+                patch_artist=True)
+for patch, c in zip(bp['boxes'], ['#4878a8', '#27ae60', '#e67e22', '#8e44ad']):
+    patch.set_facecolor(c)
+    patch.set_alpha(0.55)
+for med in bp['medians']:
+    med.set_color('#c0392b')
+    med.set_linewidth(1.4)
+for i, arr in enumerate(data):
+    ax.text(i + 1, ax.get_ylim()[1], 'MAE %.1f' % np.abs(arr).mean(),
+            ha='center', va='bottom', fontsize=9, color='#2c3e50')
+ax.axhline(0, color='#2c3e50', lw=0.9, ls='--')
+ax.set_ylabel('预报误差 / kW')
+ax.set_title('问题3 四个发布时刻的光伏预报误差分布（全年365天×24个提前时长）')
+fig.tight_layout()
+fig.savefig(PIC / 'q3_err_boxplot.png')
+plt.close(fig)
+pr('saved q3_err_boxplot.png')
+
+# ============ 图6: 滚动调整累计节省曲线 ============
+daily_save = np.array([ct_f[d]['total'] - q3_f[d]['total'] for d in DAYS_OUT])
+cum = np.cumsum(daily_save)
+xday = [dates[d] for d in DAYS_OUT]
+
+fig, ax = plt.subplots(figsize=(9, 4.6))
+ax.plot(xday, cum / 1e4, color='#c0392b', lw=1.8)
+ax.fill_between(xday, 0, cum / 1e4, color='#c0392b', alpha=0.12)
+ax.annotate('累计节省 %.2f 万元' % (cum[-1] / 1e4),
+            xy=(xday[-1], cum[-1] / 1e4),
+            xytext=(xday[int(len(xday) * 0.45)], cum[-1] / 1e4 * 0.62),
+            fontsize=10, color='#c0392b',
+            arrowprops=dict(arrowstyle='->', color='#c0392b', lw=1.0))
+ax.set_xlabel('日期')
+ax.set_ylabel('累计节省 / 万元')
+ax.set_title('问题3 滚动调整策略相对“仅0:00计划”的累计节省（334天）')
+fig.autofmt_xdate(rotation=25)
+fig.tight_layout()
+fig.savefig(PIC / 'q3_cum_saving.png')
+plt.close(fig)
+pr('saved q3_cum_saving.png  累计节省 %.2f 元' % cum[-1])
+
 pr('ALL DONE (Q3)')
