@@ -1,0 +1,40 @@
+
+% ════════════════════════════════════════════
+% 具体分析（5.4.1.具体分析.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{具体分析}
+
+针对问题四，本问属于波动电价下的随机调度优化类问题，在问题二、问题三模型的基础上，将固定的分时电价替换为附件四提供的实时波动电价，重新计算逐日计划购电与滚动调整购电策略。
+
+本文先读取附件四中全年 365 天、每天 144 个 10 分钟时间点的波动电价数据，与附件二的实际负载光伏、附件三的光伏预报完成时间对齐；将问题二、问题三模型中的电价参数替换为逐间隔波动电价，重新求解逐日线性规划与滚动调整线性规划；分别得到波动电价下问题二的计划购电策略与问题三的调整购电策略；最后与固定电价结果进行对比，分析电价波动对微网购电费用的影响。具体分析流程如图\ref{fig:analysis4_flow}所示。
+
+\begin{figure}[H]
+    \begin{center}
+        \begin{tikzpicture}[x=1cm, y=0.75cm,
+            flowhead/.style={rectangle, rounded corners=3pt, draw=violet!70!black, fill=violet!50!black, text=white, font=\bfseries, minimum width=7.2cm, minimum height=1.1cm, align=center, inner sep=2pt, line width=0.7pt},
+            flowbox/.style={rectangle, rounded corners=2.5pt, draw=violet!65!black, fill=violet!14, minimum width=7.2cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.6pt},
+            flowend/.style={rectangle, rounded corners=2.5pt, draw=violet!75!black, fill=violet!40!black, text=white, font=\bfseries, minimum width=7.2cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.7pt},
+            flowarrow/.style={thick, -{Stealth}, violet!55!black}
+        ]
+            \node[flowhead] at (0, 0) (h) {问题四：波动电价购电策略};
+            \node[flowbox] at (0, -1.8) (s1) {\textbf{读取波动电价}\\\footnotesize 全年 365 天 × 144 点波动电价};
+            \node[flowbox] at (0, -3.6) (s2) {\textbf{数据时间对齐}\\\footnotesize 与负荷 · 光伏 · 预报对齐};
+            \node[flowbox] at (0, -5.4) (s3) {\textbf{替换电价参数}\\\footnotesize 逐间隔替换为波动电价};
+            \node[flowbox] at (0, -7.2) (s4) {\textbf{重算问题二}\\\footnotesize 得到波动电价下逐日计划购电};
+            \node[flowbox] at (0, -9.0) (s5) {\textbf{重算问题三}\\\footnotesize 得到波动电价下滚动调整购电};
+            \node[flowbox] at (0, -10.8) (s6) {\textbf{惩罚与紧急计价}\\\footnotesize 分段惩罚与 5 倍紧急购电};
+            \node[flowbox] at (0, -12.6) (s7) {\textbf{固定波动对比}\\\footnotesize 固定电价与波动电价费用对比};
+            \node[flowend] at (0, -14.4) (s8) {电价影响分析\\\footnotesize 分析电价波动对购电费用的影响};
+            \draw[flowarrow] (h) -- (s1);
+            \draw[flowarrow] (s1) -- (s2);
+            \draw[flowarrow] (s2) -- (s3);
+            \draw[flowarrow] (s3) -- (s4);
+            \draw[flowarrow] (s4) -- (s5);
+            \draw[flowarrow] (s5) -- (s6);
+            \draw[flowarrow] (s6) -- (s7);
+            \draw[flowarrow] (s7) -- (s8);
+        \end{tikzpicture}
+        \caption{问题四分析流程图}
+        \label{fig:analysis4_flow}
+    \end{center}
+\end{figure}

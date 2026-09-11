@@ -1,0 +1,40 @@
+
+% ════════════════════════════════════════════
+% 具体分析（5.2.1.具体分析.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{具体分析}
+
+针对问题二，本问属于带时间序列输入的确定性滚动优化类问题，在问题一线性规划模型的基础上，将单日扩展为全年 365 天逐日递推，并引入紧急购电惩罚机制。
+
+本文先读取附件一中每日相同的分时电价与附件二中全年 365 天的实际负载与光伏功率数据，按天组织为 365 组 144 维功率序列；以附录一给定的 2025 年 1 月 1 日 0:00 储电量 6000 kWh 为起点，逐日求解线性规划（其中 1 月作为预热期），并将每日末储电量传递给次日作为初值；针对实际供电低于负载的情形建立紧急购电费用项，其电价为交易时刻电价的 5 倍；最后输出 2025 年 2 月 1 日至 12 月 31 日共 334 天的计划购电量、储能充放电量与紧急购电量。具体分析流程如图\ref{fig:analysis2_flow}所示。
+
+\begin{figure}[H]
+    \begin{center}
+        \begin{tikzpicture}[x=1cm, y=0.75cm,
+            flowhead/.style={rectangle, rounded corners=3pt, draw=green!60!black, fill=green!45!black, text=white, font=\bfseries, minimum width=7.2cm, minimum height=1.1cm, align=center, inner sep=2pt, line width=0.7pt},
+            flowbox/.style={rectangle, rounded corners=2.5pt, draw=green!55!black, fill=green!12, minimum width=7.2cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.6pt},
+            flowend/.style={rectangle, rounded corners=2.5pt, draw=green!65!black, fill=green!35!black, text=white, font=\bfseries, minimum width=7.2cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.7pt},
+            flowarrow/.style={thick, -{Stealth}, green!50!black}
+        ]
+            \node[flowhead] at (0, 0) (h) {问题二：全年逐日滚动优化};
+            \node[flowbox] at (0, -1.8) (s1) {\textbf{读取全年数据}\\\footnotesize 365 天负荷 · 光伏 · 分时电价};
+            \node[flowbox] at (0, -3.6) (s2) {\textbf{按天切分对齐}\\\footnotesize 365 组 144 维功率序列};
+            \node[flowbox] at (0, -5.4) (s3) {\textbf{设定储电初值}\\\footnotesize 1 月 1 日 0:00 储电量 6000 kWh};
+            \node[flowbox] at (0, -7.2) (s4) {\textbf{逐日线性规划}\\\footnotesize 单日购电与充放电联合优化};
+            \node[flowbox] at (0, -9.0) (s5) {\textbf{日间储电量传递}\\\footnotesize 当日末储电量作为次日初值};
+            \node[flowbox] at (0, -10.8) (s6) {\textbf{紧急购电惩罚}\\\footnotesize 按交易电价 5 倍计价};
+            \node[flowbox] at (0, -12.6) (s7) {\textbf{滚动递推全年}\\\footnotesize 逐日递推共 365 天};
+            \node[flowend] at (0, -14.4) (s8) {汇总输出结果\\\footnotesize 2 月 1 日—12 月 31 日购电与紧急购电量};
+            \draw[flowarrow] (h) -- (s1);
+            \draw[flowarrow] (s1) -- (s2);
+            \draw[flowarrow] (s2) -- (s3);
+            \draw[flowarrow] (s3) -- (s4);
+            \draw[flowarrow] (s4) -- (s5);
+            \draw[flowarrow] (s5) -- (s6);
+            \draw[flowarrow] (s6) -- (s7);
+            \draw[flowarrow] (s7) -- (s8);
+        \end{tikzpicture}
+        \caption{问题二分析流程图}
+        \label{fig:analysis2_flow}
+    \end{center}
+\end{figure}

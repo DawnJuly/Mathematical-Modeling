@@ -1,0 +1,65 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.4.3.模型建立.tex，三级子块）
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题四，本节在问题二、问题三模型的基础上，将固定分时电价替换为逐间隔波动电价，建立波动电价下的微网购电策略模型。具体过程如下。
+
+\textbf{步骤1：波动电价下的逐日计划模型}
+
+对应问题二，第 $d$ 天的逐日计划购电模型的目标函数为：
+\begin{equation}
+    \min \; Z_d=\sum_{k=0}^{143} g_{d,k}\,p_{d,k}\,\Delta t
+\end{equation}
+功率平衡、储能状态递推、容量与功率约束分别保持为：
+\begin{equation}
+    g_{d,k}+S_{d,k}+d_{d,k}-c_{d,k}\geq L_{d,k}
+\end{equation}
+\begin{equation}
+    E_{d,k+1}=E_{d,k}+\eta\,c_{d,k}\,\Delta t-\frac{1}{\eta}\,d_{d,k}\,\Delta t
+\end{equation}
+\begin{equation}
+    E_{\min}\leq E_{d,k}\leq E_{\max},\quad 0\leq c_{d,k},d_{d,k}\leq P_{\max},\quad g_{d,k}\geq 0
+\end{equation}
+日间储电量传递关系与首日初值同问题二：
+\begin{equation}
+    E_{d+1,0}=E_{d,144},\quad E_{0,0}=6000
+\end{equation}
+
+\textbf{步骤2：波动电价下的滚动调整模型}
+
+对应问题三，0:00 计划购电的目标函数与约束为：
+\begin{equation}
+    \min \; Z^{\mathrm{p}}=\sum_{k=0}^{143} g^{\mathrm{p}}_k\,p_{d,k}\,\Delta t
+\end{equation}
+\begin{equation}
+    g^{\mathrm{p}}_k+S^{0}_k+d^{\mathrm{p}}_k-c^{\mathrm{p}}_k\geq L_k
+\end{equation}
+调整子问题的分段费用上境约束改写为：
+\begin{equation}
+    w_k\geq 0.5\,p_{d,k}\Delta t\,(g^{\mathrm{a}}_k+g^{\mathrm{p}}_k)
+\end{equation}
+\begin{equation}
+    w_k\geq 1.5\,p_{d,k}\Delta t\,g^{\mathrm{a}}_k-0.5\,p_{d,k}\Delta t\,g^{\mathrm{p}}_k
+\end{equation}
+紧急购电能量按实际供电缺口核算，即最终调整购电 $g^{\mathrm{a}}_k$、最终充放电与真实光伏下仍不能满足负载的部分，紧急购电能量与费用分别为：
+\begin{equation}
+    \delta_k=\max\Big\{L_k-\big(g^{\mathrm{a}}_k+S^{\mathrm{r}}_k+d^{\mathrm{a}}_k-c^{\mathrm{a}}_k\big),\,0\Big\}
+\end{equation}
+\begin{equation}
+    Z^{\mathrm{em}}_k=5\,p_{d,k}\,\delta_k\,\Delta t
+\end{equation}
+
+\textbf{步骤3：全年总费用}
+
+波动电价下，问题二对应的全年总购电费用与问题三对应的全年总费用分别为：
+\begin{equation}
+    Z^{(2)}=\sum_{d=0}^{364}Z_d
+\end{equation}
+\begin{equation}
+    Z^{(3)}=\sum_{d=0}^{364}\sum_{k=0}^{143}\Big(C_{d,k}+5\,p_{d,k}\,\delta_{d,k}\Delta t\Big)
+\end{equation}
+其中，$C_{d,k}$ 为式(32)定义的分段购电费用。该模型在保持线性规划结构不变的前提下，通过电价参数 $p_{d,k}$ 的逐间隔替换，完整刻画了实时波动电价对微网购电策略的影响。
+
+综上所述，本节完成了波动电价下问题二与问题三两个模型的建立，得到了逐日计划与滚动调整两套策略的完整数学表达，接下来将基于此进行求解。

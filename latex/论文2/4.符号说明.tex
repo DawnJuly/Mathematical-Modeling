@@ -1,0 +1,39 @@
+
+% ════════════════════════════════════════
+% 符号说明（04.符号说明.tex）
+% ════════════════════════════════════════
+\section{符号说明}
+
+本文使用的主要符号及其含义如表\ref{tab:符号说明}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.16\textwidth}>{\centering\arraybackslash}p{0.12\textwidth}>{\centering\arraybackslash}p{0.62\textwidth}}
+  \caption{符号说明}
+  \label{tab:符号说明} \\
+  \toprule
+  符号 & 单位 & 说明 \\
+  \midrule
+  \endfirsthead
+  \caption{符号说明（续）} \\
+  \toprule
+  符号 & 单位 & 说明 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  $k$ & — & 日内时间间隔序号（$k=0,1,\dots,143$） \\
+  $\Delta t$ & h & 时间步长（$1/6$ 小时，即 10 分钟） \\
+  $L_k$ & kW & 第 $k$ 个间隔的小区负载功率 \\
+  $S_k$ & kW & 第 $k$ 个间隔的光伏发电功率 \\
+  $S^{\tau}_k$ & kW & 预报时刻 $\tau$ 发布的第 $k$ 个间隔光伏预报功率 \\
+  $p_k$ & 元/kWh & 第 $k$ 个间隔的外网交易电价 \\
+  $g_k$ & kW & 第 $k$ 个间隔的计划购电功率 \\
+  $g^{\mathrm{p}}_k$ & kW & 0:00 制定的计划购电功率 \\
+  $g^{\mathrm{a}}_k$ & kW & 调整后的购电功率 \\
+  $c_k$ & kW & 第 $k$ 个间隔的储能充电功率 \\
+  $d_k$ & kW & 第 $k$ 个间隔的储能放电功率 \\
+  $E_k$ & kWh & 第 $k$ 个间隔起始时刻的储电量 \\
+  $\eta$ & — & 储能充放电效率（取 0.9） \\
+  $E_{\min},E_{\max}$ & kWh & 储电量上下限（1200、10800） \\
+  $P_{\max}$ & kW & 储能最大充放电功率（5000） \\
+  $\delta_k$ & kWh & 第 $k$ 个间隔的实际供电缺口（紧急购电能量） \\
+\end{longtable}

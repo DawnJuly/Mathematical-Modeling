@@ -26,11 +26,15 @@ C题/_tmp/
 C题/result*.xlsx
 C题/q*_log.txt
 
-# ---- LaTeX 编译中间产物（latexmk 可重新生成，不提交）----
-C题/latex/*.aux
-C题/latex/*.log
-C题/latex/*.out
-C题/latex/*.fls
-C题/latex/*.fdb_latexmk
-C题/latex/*.synctex.gz
-C题/latex/*.xdv
+# ---- LaTeX 编译中间产物（latexmk/xelatex 可重新生成，不提交）----
+latex/**/*.aux
+latex/**/*.log
+latex/**/*.out
+latex/**/*.fls
+latex/**/*.fdb_latexmk
+latex/**/*.synctex.gz
+latex/**/*.xdv
+latex/**/auto/
+
+# ---- 求解程序绘图时生成的字体缓存哨兵（运行时自动重建，不提交）----
+latex/**/_fonts_ready
