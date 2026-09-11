@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """灵敏度分析（论文第九章）：
 (1) 问题一：储能容量 12000±10% kWh、充放电效率 0.90±0.05 对典型日购电费的影响
-    （LP 结构与 q1.py 完全一致：soc[0] 自由 + 日循环闭合，仅参数化容量与效率）；
+    （LP 结构与 q1.py 完全一致：soc[0]=6000 kWh 固定 + 日循环闭合，仅参数化容量与效率）；
 (2) 问题二：储能容量 ±10% 对全年(2.1-12.31, 334天)总电费的影响（理想光伏情形，
     通过 monkeypatch lp_core.SOC_LO/SOC_HI 实现，LP 与 q2.py 同构）；
 (3) 问题三：光伏预报系统性偏差（FC×0.8 / ×1.0 / ×1.2）对全年滚动调度总电费
@@ -45,8 +45,9 @@ def q1_lp(S, eta):
         Aub[t, ib + t] = -1.0
         Aub[t, id_ + t] = -1.0
         Aub[t, ic + t] = 1.0
-    bounds = ([(0, None)] * T + [(0, PMAX)] * (2 * T) +
-              [(s_lo, s_hi)] * (T + 1))
+    soc_b = [(s_lo, s_hi)] * (T + 1)
+    soc_b[0] = (6000.0, 6000.0)          # 附录1 题给 0:00 初值，与 q1.py 一致
+    bounds = [(0, None)] * T + [(0, PMAX)] * (2 * T) + soc_b
     res = linprog(c, A_ub=Aub.tocsr(), b_ub=pv - load, A_eq=Aeq.tocsr(),
                   b_eq=beq, bounds=bounds, method='highs')
     assert res.status == 0, res.message
@@ -74,10 +75,10 @@ def q3_year_totals(scale):
 
 def main():
     print('=' * 72)
-    print('(1) 问题一：容量与效率灵敏度（典型日=附件1，基准 35118.60）')
+    print('(1) 问题一：容量与效率灵敏度（典型日=附件1，基准 35126.95）')
     base = q1_lp(12000.0, 0.9)
-    print('  基准 S=12000, eta=0.90 : %.2f  (q1 日志 35118.60)' % base)
-    assert abs(base - 35118.60) < 0.01, base
+    print('  基准 S=12000, eta=0.90 : %.2f  (q1 日志 35126.95)' % base)
+    assert abs(base - 35126.95) < 0.01, base
     for S in (13200.0, 10800.0):
         v = q1_lp(S, 0.9)
         print('  S=%7.0f (%+.0f%%) : %.2f  变化 %+.2f%%'

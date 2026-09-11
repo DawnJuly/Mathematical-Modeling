@@ -52,6 +52,8 @@ for t in range(T):
 
 bounds = ([(0, None)] * T + [(0, PMAX)] * T + [(0, PMAX)] * T +
           [(SOC_LO, SOC_HI)] * (T + 1))
+# 附录1: 2025-01-01 0:00 储电量 6000 kWh (题给初值, 固定)
+bounds[is_] = (6000.0, 6000.0)
 
 res = linprog(c, A_ub=Aub.tocsr(), b_ub=bub, A_eq=Aeq.tocsr(), b_eq=beq,
               bounds=bounds, method='highs')

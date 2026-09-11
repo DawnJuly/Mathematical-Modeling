@@ -6,7 +6,7 @@ R1：问题1 变流器功率上限 P_inv 灵敏度（4000/5000/6000 kW）
 R1：问题3 紧急购电价倍数灵敏度（4/5/6，全年 334 天滚动口径）
 
 说明：
-- 问题1 LP 与 q1.py 完全一致：SOC[0] 自由 + 日循环闭合，仅把变流器
+- 问题1 LP 与 q1.py 完全一致：SOC[0]=6000 kWh 固定 + 日循环闭合，仅把变流器
   功率上限参数化（PMAX = P_inv * DT）。
 - 问题3 复用 lp_core.q3_year，通过 monkeypatch lp_core.EMERG 实现。
 """
@@ -55,8 +55,9 @@ def q1_full(pmax_kw, eta=0.9):
         Aub[t, ib + t] = -1.0
         Aub[t, id_ + t] = -1.0
         Aub[t, ic + t] = 1.0
-    bounds = ([(0, None)] * T + [(0, pmax)] * (2 * T) +
-              [(C.SOC_LO, C.SOC_HI)] * (T + 1))
+    soc_b = [(C.SOC_LO, C.SOC_HI)] * (T + 1)
+    soc_b[0] = (6000.0, 6000.0)          # 附录1 题给 0:00 初值，与 q1.py 一致
+    bounds = [(0, None)] * T + [(0, pmax)] * (2 * T) + soc_b
     res = linprog(c, A_ub=Aub.tocsr(), b_ub=pv - load, A_eq=Aeq.tocsr(),
                   b_eq=np.zeros(T + 1), bounds=bounds, method='highs')
     assert res.status == 0, res.message
@@ -88,8 +89,8 @@ def main():
     # 弃光 = 能量平衡残差 buy+pv+dis-load-ch（非负，LP 约束保证）
     curt = buy1 + pv_e + dis1 - load_e - ch1
     sc1 = float((pv_e.sum() - curt.sum()) / pv_e.sum())
-    log('  有储能购电费 = %.4f 元 (q1 基准 35118.60)' % cost1)
-    assert abs(cost1 - 35118.60) < 0.01, cost1
+    log('  有储能购电费 = %.4f 元 (q1 基准 35126.95)' % cost1)
+    assert abs(cost1 - 35126.95) < 0.01, cost1
     save = cost0 - cost1
     log('  储能节省 = %.4f 元 (%.4f%%)' % (save, save / cost0 * 100))
     log('  有储能弃光量 = %.4f kWh' % curt.sum())
