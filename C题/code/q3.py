@@ -39,13 +39,13 @@ log('附件3 预报负值个数: %d (已clip到0)' % D['n_neg_fc'])
 # ---------- 2. 预报映射约定验证 (约定B vs 约定A) ----------
 log('')
 log('===== 预报映射约定验证 =====')
-log('约定B: 「预报k小时」对应发布时刻起第k个小时区间 [T+k-1, T+k), 即 lag=-1')
-log('约定A: 「预报k小时」对应 [T+k, T+k+1), 即 lag=0')
+log('约定B: 「预报k小时」对应发布时刻起第k个小时区间 [T+k-1, T+k), 即 lag=0')
+log('约定A: 「预报k小时」对应提前一个小时的区间 [T+k-2, T+k-1), 即 lag=-1')
 log('按发布时刻分组全年统计 (单位kW):')
 log('%-8s %-6s %10s %10s %10s %8s' % ('发布时刻', '约定', 'MAE', '白天MAE', 'RMSE', 'corr'))
 conv_tbl = []
 for j, h0 in enumerate(STAGES):
-    for lag, name in [(-1, 'B'), (0, 'A')]:
+    for lag, name in [(0, 'B'), (-1, 'A')]:
         errs, preds, acts = [], [], []
         for d in range(365):
             for k in range(1, 25):

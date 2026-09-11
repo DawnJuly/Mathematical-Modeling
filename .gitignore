@@ -18,3 +18,6 @@ __pycache__/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# ---- 本地临时目录（中间结果，不提交）----
+C题/_tmp/
