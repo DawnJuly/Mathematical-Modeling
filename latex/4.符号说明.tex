@@ -6,41 +6,27 @@
 
 主要符号及其含义如表\ref{tab:符号说明}所示。
 
-\begin{longtable}{>{\centering\arraybackslash}p{0.16\textwidth}>{\centering\arraybackslash}p{0.12\textwidth}>{\centering\arraybackslash}p{0.62\textwidth}}
+\begin{table}[H]
+  \centering
   \caption{符号说明}
-  \label{tab:符号说明} \\
-  \toprule
-  符号 & 单位 & 说明 \\
-  \midrule
-  \endfirsthead
-  \caption{符号说明（续）} \\
-  \toprule
-  符号 & 单位 & 说明 \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endfoot
-  $k$ & — & 日内时间间隔序号（$k=0,1,\dots,143$） \\
-  $\Delta t$ & h & 时间步长（$1/6$ 小时，即 10 分钟） \\
-  $L_k$ & kW & 第 $k$ 个间隔的小区负载功率 \\
-  $S_k$ & kW & 第 $k$ 个间隔的光伏发电功率 \\
-  $S^{\tau}_k$ & kW & 预报时刻 $\tau$ 发布的第 $k$ 个间隔光伏预报功率 \\
-  $\hat L_k$ & kW & 0:00 预测得到的第 $k$ 个间隔负载功率 \\
-  $\hat S_k$ & kW & 0:00 预测得到的第 $k$ 个间隔光伏功率 \\
-  $\varepsilon^{L}_k,\varepsilon^{S}_k$ & kW & 负载、光伏的预测残差（实际值减预测值） \\
-  $s$ & — & 不确定性情景序号（$s=1,\dots,9$） \\
-  $\omega_s$ & — & 第 $s$ 个场景下负载与光伏的乘积因子对 \\
-  $\pi_s$ & — & 第 $s$ 个情景的概率 \\
-  $L^{s}_k,S^{s}_k$ & kW & 第 $s$ 个情景下第 $k$ 个间隔的负载、光伏功率 \\
-  $p_k$ & 元/kWh & 第 $k$ 个间隔的外网交易电价 \\
-  $g_k$ & kW & 第 $k$ 个间隔的计划购电功率 \\
-  $g^{\mathrm{p}}_k$ & kW & 0:00 制定的计划购电功率 \\
-  $g^{\mathrm{a}}_k$ & kW & 调整后的购电功率 \\
-  $c_k$ & kW & 第 $k$ 个间隔的储能充电功率 \\
-  $d_k$ & kW & 第 $k$ 个间隔的储能放电功率 \\
-  $E_k$ & kWh & 第 $k$ 个间隔起始时刻的储电量 \\
-  $\eta$ & — & 储能充放电效率（取 0.9） \\
-  $E_{\min},E_{\max}$ & kWh & 储电量上下限（1200、10800） \\
-  $P_{\max}$ & kW & 储能最大充放电功率（5000） \\
-  $\delta_k$ & kWh & 第 $k$ 个间隔的实际供电缺口（紧急购电能量） \\
-\end{longtable}
+  \label{tab:符号说明}
+  {\small
+  \renewcommand{\arraystretch}{0.95}
+  \begin{tabular}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.10\textwidth}>{\centering\arraybackslash}p{0.52\textwidth}}
+    \toprule
+    符号 & 单位 & 说明 \\
+    \midrule
+    $k,\ \Delta t$ & —、h & 日内时间间隔序号（$k=0,1,\dots,143$）与时间步长（$1/6$ 小时，即 10 分钟） \\
+    $L_k,\ S_k,\ S^{\tau}_k$ & kW & 第 $k$ 个间隔的小区负载与光伏实际功率，$S^{\tau}_k$ 为预报时刻 $\tau$ 发布的光伏预报功率 \\
+    $\hat L_{d,k},\ \hat S_{d,k}$ & kW & 0:00 预测的该日第 $k$ 个间隔负载、光伏功率 \\
+    $\varepsilon^{L}_{d,k},\ \varepsilon^{S}_{d,k}$ & kW & 负载、光伏的预测残差（实际值减预测值） \\
+    $s,\ \omega_s,\ \pi_s$ & — & 情景序号、负载与光伏乘积因子对及情景概率（$s=1,\dots,9$） \\
+    $L^{s}_{d,k},\ S^{s}_{d,k}$ & kW & 第 $s$ 个情景下第 $k$ 个间隔的负载、光伏功率 \\
+    $p_k,\ g_k,\ g^{\mathrm{p}}_k,\ g^{\mathrm{a}}_k$ & 元/kWh、kW & 第 $k$ 个间隔的外网电价，及 0:00 计划购电功率与调整后购电功率 \\
+    $c_k,\ d_k$ & kW & 第 $k$ 个间隔的储能充、放电功率 \\
+    $E_k,\ E_{\min},\ E_{\max}$ & kWh & 第 $k$ 个间隔起始时刻的储电量及其上下限（1200、10800） \\
+    $P_{\max},\ \eta$ & kW、— & 储能最大充放电功率（5000）与充放电效率（0.9） \\
+    $\delta_k$ & kWh & 第 $k$ 个间隔的实际供电缺口（紧急购电能量） \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
