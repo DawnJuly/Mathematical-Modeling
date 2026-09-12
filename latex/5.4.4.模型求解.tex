@@ -92,25 +92,25 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.42\textwidth]{求解/问题四/图片/图4-2_波动电价四季典型日购电.png}
+    \includegraphics[width=0.9\textwidth]{求解/问题四/图片/图4-2_波动电价四季典型日购电.png}
     \caption{波动电价下四季典型日购电策略}
     \label{fig:结果4-2}
 \end{figure}
 
-光伏预报更新后，调整策略仍在预报时点修正购电功率，幅度因电价波动而异，方向仍以减小供电缺口、压缩高价时段购电为主；储能荷电状态日内多次充放切换以适应峰谷变化，全程满足容量约束，峰谷价差转化为套利收益（图~\ref{fig:结果4-3}）。
+光伏预报更新后，调整策略仍在预报时点修正购电功率，幅度因电价波动而异，方向仍以减小供电缺口、压缩高价时段购电为主；储能荷电状态日内多次充放切换以适应峰谷变化，全程满足容量约束，峰谷价差转化为套利收益（图~\ref{fig:结果4-3}、图~\ref{fig:结果4-3b}）。
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.44\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题四/图片/图4-3_波动电价滚动调整购电.png}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.44\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题四/图片/图4-4_波动电价SOC轨迹.png}
-    \end{minipage}
-    \caption{左：波动电价下典型日计划与调整购电对比；右：波动电价下典型日储能荷电状态轨迹}
+    \includegraphics[width=0.9\textwidth]{求解/问题四/图片/图4-3_波动电价滚动调整购电.png}
+    \caption{波动电价下典型日计划与调整购电对比}
     \label{fig:结果4-3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{求解/问题四/图片/图4-4_波动电价SOC轨迹.png}
+    \caption{波动电价下典型日储能荷电状态轨迹}
+    \label{fig:结果4-3b}
 \end{figure}
 
 波动电价下两问费用均高于固定电价情形：问题二由 14382892.99 元升至 15077131.66 元，问题三由 14337999.15 元升至 14956526.18 元，问题三较问题二节省 120605.48 元（约 0.80\%）。费用抬升源于可套利的时段价差被削薄，储能低充高放收益下降，节省率由固定电价时的 3.00\% 降至 0.80\%。本文求解流程不依赖电价的具体形式，沿用固定电价下标定的流程即可得到波动电价下的两套策略。

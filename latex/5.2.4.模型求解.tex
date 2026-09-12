@@ -14,7 +14,7 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.42\textwidth]{求解/问题二/图片/图2-7_预测与实际对比.png}
+    \includegraphics[width=0.9\textwidth]{求解/问题二/图片/图2-7_预测与实际对比.png}
     \caption{典型日负载与光伏的预测值与实际值对比}
     \label{fig:结果2-7}
 \end{figure}
@@ -48,32 +48,32 @@
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.40\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题二/图片/图2-2_全年逐日购电费.png}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.40\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题二/图片/图2-9_紧急购电分布.png}
-    \end{minipage}
-    \caption{左：2.1—12.31 逐日购电费及 7 日滑动平均；右：全年紧急购电量的分布}
+    \includegraphics[width=0.9\textwidth]{求解/问题二/图片/图2-2_全年逐日购电费.png}
+    \caption{2.1—12.31 逐日购电费及 7 日滑动平均}
     \label{fig:结果2-2}
 \end{figure}
 
-四季典型日购电功率与储能荷电状态如图\ref{fig:结果2-3}。四季购电功率均集中在夜间低电价时段，白天由光伏与储能放电支撑而明显减小；冬季典型日整体最高，与表\ref{tab:结果2-1}中冬季购电费最高一致。
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{求解/问题二/图片/图2-9_紧急购电分布.png}
+    \caption{全年紧急购电量的分布}
+    \label{fig:结果2-2b}
+\end{figure}
+
+四季典型日购电功率与储能荷电状态如图\ref{fig:结果2-3}、图\ref{fig:结果2-3b}。四季购电功率均集中在夜间低电价时段，白天由光伏与储能放电支撑而明显减小；冬季典型日整体最高，与表\ref{tab:结果2-1}中冬季购电费最高一致。
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.40\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题二/图片/图2-3_四季典型日购电策略.png}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.40\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{求解/问题二/图片/图2-4_四季典型日SOC轨迹.png}
-    \end{minipage}
-    \caption{左：四季典型日的购电功率策略；右：四季典型日储能荷电状态轨迹}
+    \includegraphics[width=0.9\textwidth]{求解/问题二/图片/图2-3_四季典型日购电策略.png}
+    \caption{四季典型日的购电功率策略}
     \label{fig:结果2-3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{求解/问题二/图片/图2-4_四季典型日SOC轨迹.png}
+    \caption{四季典型日储能荷电状态轨迹}
+    \label{fig:结果2-3b}
 \end{figure}
 
 四个指定日期的储能充放电结果见表\ref{tab:结果2-2}。四日 0:00 与 24:00 储电量均回到 1200 kWh 下限，全天在 $[1200,10800]$ kWh 内完成一次充放循环：00:00—04:00 与午间光伏富余时段充电，04:00—08:00 及 16:00—24:00 放电；四日 16:00—20:00 与 20:00—24:00 放电量合计均为 8640 kWh，恰为当日可用储电量上限 $0.9\times(10800-1200)$，“谷充峰放”被用尽。
@@ -104,7 +104,7 @@
 
 日末储电量必然回落至下限（见表\ref{tab:结果2-2}），源于跨日留存电量需额外承担往返损耗，日内低充高放已被充分利用。
 
-紧急购电分段明细见表\ref{tab:结果2-3}：四个指定日期分别出现 16、11、15、10 段，合计 1400.66、424.89、583.54、830.33 kWh，单段多为 10$\sim$30 分钟，最长 608.79 kWh（12 月 21 日 10:20—11:40），且集中在夜间至清晨（00:00—08:00）与傍晚（16:00—20:00）。全年紧急购电功率分布见图\ref{fig:结果2-2}右，量级集中在 0$\sim$500 kW，冬季高于夏季。
+紧急购电分段明细见表\ref{tab:结果2-3}：四个指定日期分别出现 16、11、15、10 段，合计 1400.66、424.89、583.54、830.33 kWh，单段多为 10$\sim$30 分钟，最长 608.79 kWh（12 月 21 日 10:20—11:40），且集中在夜间至清晨（00:00—08:00）与傍晚（16:00—20:00）。全年紧急购电功率分布见图\ref{fig:结果2-2b}，量级集中在 0$\sim$500 kW，冬季高于夏季。
 
 {\footnotesize\renewcommand{\arraystretch}{0.95}\begin{longtable}{>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}>{\centering\arraybackslash}p{0.11\textwidth}>{\centering\arraybackslash}p{0.08\textwidth}}
   
