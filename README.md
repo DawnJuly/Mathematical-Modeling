@@ -67,6 +67,7 @@ math/
 - `format.cls`：赛方模板类，不要改。
 - `fonts/`：模板需要的中文字体，`论文.pdf` 的中文排版靠它。
 - `论文.pdf`：编译成品。`论文.xdv`、`论文.aux`、`论文.log`、`论文.out`、`论文.fls`、`论文.fdb_latexmk`、`_compile1.log`、`_fonts_ready` 都是可重新生成的中间产物，已在 `.gitignore` 中排除。
+- 个别情况下 xelatex 会把成品 PDF 写成乱码文件名 `璁烘枃.pdf`（"论文"两字被按 GBK 误读），它与 `论文.pdf` 内容相同，改名覆盖即可；该文件名已在 `.gitignore` 中排除。
 - `结果/`：空目录，预留位置，当前无内容。
 
 ### latex/求解/ —— 现行求解程序

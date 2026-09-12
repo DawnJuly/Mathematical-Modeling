@@ -36,5 +36,8 @@ latex/**/*.synctex.gz
 latex/**/*.xdv
 latex/**/auto/
 
+# xelatex 在本机偶发把成品 PDF 写成 GBK 误读的文件名（"论文"→"璁烘枃"），是同一成品的副本，可删
+latex/*璁烘枃*.pdf
+
 # ---- 求解程序绘图时生成的字体缓存哨兵（运行时自动重建，不提交）----
 latex/**/_fonts_ready
