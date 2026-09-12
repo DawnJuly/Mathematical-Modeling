@@ -138,6 +138,11 @@ _, _, _, _, lp_free1 = solve_daily(load1, pv1, price_daily, e0=E0_INIT)
 dp_free1, _ = solve_dp(load1, pv1, price_daily, E0_INIT, e_end=None, de=20.0)
 print(f'问题一(自由末值): LP={lp_free1:.2f} 元, DP(de=20)={dp_free1:.2f} 元, 偏差 {100*(dp_free1-lp_free1)/lp_free1:+.4f}%')
 
+# 问题一无储能对照：储电量恒为 0，净负荷全部从电网购入，光伏富余计弃电
+g_nostor1 = np.maximum(load1 - pv1, 0.0)
+nostor1 = float(np.sum(price_daily * g_nostor1) * DT)
+print(f'问题一无储能 全天购电费 = {nostor1:.2f} 元, 相对储能方案 {100*(nostor1-lp_cost1)/lp_cost1:+.2f}%')
+
 # ---------- 出图 图6-1 稳健性检验 ----------
 C1, C2, C3, C4, C6 = '#2E5FA3', '#E07B39', '#3BA272', '#C0504D', '#D4A017'
 plt.rcParams.update({'figure.dpi': 150, 'savefig.dpi': 300, 'axes.unicode_minus': False})
@@ -185,6 +190,7 @@ print('图6-1 已保存')
 print('\n===== 稳健性检验汇总 =====')
 print(f'base={base:.2f} (计划={plan_base:.2f} 紧急={emg_base:.2f})')
 print(f'nostorage={nostor:.2f} dev={100*(nostor-base)/base:+.3f}')
+print(f'nostorage1={nostor1:.2f} dev={100*(nostor1-lp_cost1)/lp_cost1:+.3f}')
 for sigma in [0.05, 0.10]:
     v = pert[sigma]
     print(f'sigma{sigma}: mean={v.mean():.2f} std={v.std():.2f} maxdev_up={100*(v.max()-base)/base:.3f} maxdev_dn={100*(v.min()-base)/base:.3f}')

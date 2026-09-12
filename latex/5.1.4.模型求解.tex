@@ -2,7 +2,7 @@
 % ════════════════════════════════════════════
 % 模型求解（5.1.4.模型求解.tex，三级子块）
 % ════════════════════════════════════════════
-\subsubsection{模型求解}
+\subsubsection{调度结果与费用结构}
 
 基于上述模型，本节利用附件一数据在 Python 环境下调用线性规划求解器进行求解。核心参数为 $\Delta t=1/6$ h、$\eta=0.9$、$E_{\min}=1200$ kWh、$E_{\max}=10800$ kWh、$P_{\max}=5000$ kW，并按附录1给定 $E_0=6000$ kWh。求解得到微网在指定时间段的购电量及全天购电量和购电费如表\ref{tab:结果1-1}所示，储能设备在指定时段的充放电量及储电量如表\ref{tab:结果1-2}所示。
 
@@ -52,13 +52,13 @@
 \end{figure}
 
 \begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
-  \caption{微网在指定时间段的购电量及全天的购电量和购电费}
+  \caption{微网在指定时间段的购电量（kWh）及全天的购电量和购电费（元）}
   \label{tab:结果1-1} \\
   \toprule
   时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
   \midrule
   \endfirsthead
-  \caption{微网在指定时间段的购电量及全天的购电量和购电费（续）} \\
+  \caption{微网在指定时间段的购电量（kWh）及全天的购电量和购电费（元，续）} \\
   \toprule
   时间段 & 购电量 & 时间段 & 购电量 & 时间段 & 购电量 \\
   \midrule
@@ -71,13 +71,13 @@
 \end{longtable}
 
 \begin{longtable}{>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.13\textwidth}}
-  \caption{储能设备在指定时间段的充放电量及0:00和24:00的储电量}
+  \caption{储能设备在指定时间段的充放电量（kWh）及0:00和24:00的储电量（kWh）}
   \label{tab:结果1-2} \\
   \toprule
   时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
   \midrule
   \endfirsthead
-  \caption{储能设备在指定时间段的充放电量及0:00和24:00的储电量（续）} \\
+  \caption{储能设备在指定时间段的充放电量（kWh）及0:00和24:00的储电量（kWh，续）} \\
   \toprule
   时间段 & 充电量 & 放电量 & 时间段 & 充电量 & 放电量 \\
   \midrule
@@ -92,4 +92,4 @@
 
 由表\ref{tab:结果1-1}可知，微网全天计划购电量为 59482.70 kWh，全天购电费为 35126.95 元；在 10:00--10:10、14:00--14:10 与 20:00--20:10 等光伏充足或储能放电充足的时段购电量为零，而在 12:00--12:10、16:00--16:10、18:00--18:10 等负荷高企时段需要少量购电。由表\ref{tab:结果1-2}可知，储能设备在 0:00 与 24:00 的储电量均为 6000.00 kWh，与附录1给定的 0:00 储电量一致，同时满足日循环约束；储能主要在 0:00--4:00、8:00--12:00 与 20:00--24:00 等低电价时段充电，在 4:00--8:00、16:00--20:00 等高电价时段放电，体现了低充高放的套利规律。
 
-综合以上结果，问题一的线性规划模型在满足负载供电与储能运行约束的前提下，给出了全天购电费用最小的购电与充放电策略，储能设备在低价充电、高价放电的套利过程中使购电费用显著降低，模型与结果均合理可靠。
+综观全天策略，购电出现在电价与光伏出力配合最有利的时段，储能则承担把低价电量搬运到高价时段的角色。这一分工使全天购电费用降至 35126.95 元，同时首末储电量同为 6000.00 kWh，满足日循环要求。

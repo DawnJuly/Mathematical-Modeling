@@ -93,7 +93,7 @@
 
 \textbf{2.算法一致性检验}
 
-为排除单一求解器误差对结论的影响，将线性规划（LP）求解器替换为基于储电量网格离散化的动态规划（DP）算法\cite{si2009}，独立求解问题一的单日调度问题。DP 将储电量区间 $[E_{\min},E_{\max}]$ 按步长 $\Delta$ 离散化后逐时段递推最优费用，与 LP 属于完全不同的求解范式，不同网格步长下的全天购电费如表\ref{tab:robust2}所示。
+为排除单一求解器误差对结论的影响，将线性规划（LP）求解器替换为基于储电量网格离散化的动态规划（DP）算法\cite{si2011}，独立求解问题一的单日调度问题。DP 将储电量区间 $[E_{\min},E_{\max}]$ 按步长 $\Delta$ 离散化后逐时段递推最优费用，与 LP 属于完全不同的求解范式，不同网格步长下的全天购电费如表\ref{tab:robust2}所示。
 
 \begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}}
   \caption{算法一致性检验结果}
