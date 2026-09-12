@@ -8,71 +8,7 @@
 
 \begin{figure}[H]
     \begin{center}
-        \begin{tikzpicture}[x=1cm, y=1cm, scale=0.72, transform shape,
-            flowroot/.style={rectangle, rounded corners=3pt, draw=teal!80!black, fill=teal!55!black, text=white, font=\bfseries, minimum width=3.6cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.8pt},
-            flowhead/.style={rectangle, rounded corners=2pt, draw=#1!70!black, fill=#1!55!black, text=white, font=\bfseries, minimum width=3.6cm, minimum height=1.0cm, align=center, inner sep=2pt, line width=0.7pt},
-            flowbox/.style={rectangle, rounded corners=2pt, draw=#1!65!black, fill=#1!14, minimum width=3.6cm, minimum height=0.95cm, align=center, inner sep=2pt, line width=0.6pt},
-            flowarrow/.style={thick, -{Stealth}, #1!60!black}
-        ]
-
-            \node[flowroot] at (6.3, 0.3) (root) {微网购电与储能调控};
-
-            % 问题一（蓝）：单日线性规划
-            \node[flowhead=blue] at (0, -1.9) (a0) {问题一：\\单日线性规划};
-            \node[flowbox=blue] at (0, -3.6) (a1) {读取负荷光伏\\与分时电价};
-            \node[flowbox=blue] at (0, -5.3) (a2) {对齐为\\10分钟间隔};
-            \node[flowbox=blue] at (0, -7.0) (a3) {建立费用最小模型\\含容量与日循环约束};
-            \node[flowbox=blue] at (0, -8.9) (a4) {求解单日\\线性规划};
-
-            % 问题二（绿）：预测—决策—结算三段式
-            \node[flowhead=green] at (4.2, -1.9) (b0) {问题二：\\预测—决策—结算};
-            \node[flowbox=green] at (4.2, -3.6) (b1) {读取全年负荷\\光伏与电价};
-            \node[flowbox=green] at (4.2, -5.3) (b2) {1月标定预测模型\\0:00预测当日出力};
-            \node[flowbox=green] at (4.2, -7.0) (b3) {9情景两阶段\\随机线性规划};
-            \node[flowbox=green] at (4.2, -8.9) (b4) {5倍价紧急购电\\2.1—12.31汇总};
-
-            % 问题三（橙）：滚动预报调整
-            \node[flowhead=orange] at (8.4, -1.9) (c0) {问题三：\\滚动预报调整};
-            \node[flowbox=orange] at (8.4, -3.6) (c1) {光伏四时刻\\预报插值};
-            \node[flowbox=orange] at (8.4, -5.3) (c2) {0时制定\\购电计划};
-            \node[flowbox=orange] at (8.4, -7.0) (c3) {6、12、18时\\滚动调整};
-            \node[flowbox=orange] at (8.4, -8.9) (c4) {分段惩罚\\费用汇总};
-
-            % 问题四（紫）：波动电价
-            \node[flowhead=violet] at (12.6, -1.9) (d0) {问题四：\\波动电价};
-            \node[flowbox=violet] at (12.6, -3.6) (d1) {读取波动\\电价数据};
-            \node[flowbox=violet] at (12.6, -5.3) (d2) {逐间隔\\替换电价};
-            \node[flowbox=violet] at (12.6, -7.0) (d3) {重算问题二\\与问题三策略};
-            \node[flowbox=violet] at (12.6, -8.9) (d4) {固定与波动\\电价费用对比};
-
-            % 根节点到各问题的分支箭头（同色）
-            \draw[flowarrow=blue] (root) -- (a0);
-            \draw[flowarrow=green] (root) -- (b0);
-            \draw[flowarrow=orange] (root) -- (c0);
-            \draw[flowarrow=violet] (root) -- (d0);
-
-            % 各问题纵向流程箭头（同色）
-            \draw[flowarrow=blue] (a0) -- (a1);
-            \draw[flowarrow=blue] (a1) -- (a2);
-            \draw[flowarrow=blue] (a2) -- (a3);
-            \draw[flowarrow=blue] (a3) -- (a4);
-
-            \draw[flowarrow=green] (b0) -- (b1);
-            \draw[flowarrow=green] (b1) -- (b2);
-            \draw[flowarrow=green] (b2) -- (b3);
-            \draw[flowarrow=green] (b3) -- (b4);
-
-            \draw[flowarrow=orange] (c0) -- (c1);
-            \draw[flowarrow=orange] (c1) -- (c2);
-            \draw[flowarrow=orange] (c2) -- (c3);
-            \draw[flowarrow=orange] (c3) -- (c4);
-
-            \draw[flowarrow=violet] (d0) -- (d1);
-            \draw[flowarrow=violet] (d1) -- (d2);
-            \draw[flowarrow=violet] (d2) -- (d3);
-            \draw[flowarrow=violet] (d3) -- (d4);
-
-        \end{tikzpicture}
+        \includegraphics[width=0.96\textwidth]{求解/图片/图1_问题分析总体流程图.png}
         \caption{问题分析总体流程图}
         \label{fig:overall_analysis}
     \end{center}
