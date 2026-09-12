@@ -246,18 +246,7 @@ out1 = os.path.join(ROOT_OUT, 'result1.xlsx')
 wb.save(out1)
 wb.save(os.path.join(OUT_DIR, 'result1.xlsx'))
 
-# 全天购电量/购电费已按模板写入 result1.xlsx；其余全天指标另存 CSV，供论文与第六章灵敏度分析取数
-pd.DataFrame([
-    ('全天购电量(kWh)', round(float(gE.sum()), 4)),
-    ('全天购电费(元)', round(float(cost), 4)),
-    ('全天充电量(kWh)', round(float(chE.sum()), 4)),
-    ('全天放电量(kWh)', round(float(dchE.sum()), 4)),
-    ('0:00储电量(kWh)', round(float(E0), 4)),
-    ('24:00储电量(kWh)', round(float(E24), 4)),
-], columns=['指标', '数值']).to_csv(shared_path('result1_汇总.csv'), index=False, encoding='utf-8-sig')
-
 print('\n已保存 result1.xlsx（按附件5模板：计划购电量 / 充放电量，含全天购电量与全天购电费）→ 求解/结果/ 与 问题一/结果/')
-print('已保存 求解/result1_汇总.csv')
 print('全部输出图完成')
 
 # ---------- 5. 参数灵敏度（供第六章灵敏度分析，固定 E0=6000） ----------

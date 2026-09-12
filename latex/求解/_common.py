@@ -147,8 +147,8 @@ def save_csv(df, name_cn):
     df.to_csv(OUT_DIR + '/' + name_cn, index=False, encoding='utf-8-sig')
 
 def shared_path(name):
-    """跨问题共享中间文件的统一路径（存到 求解/ 根，供各问题脚本互相读取）。
-    例：问题一存 shared_path('预处理数据.csv')，问题二用 pd.read_csv(shared_path('预处理数据.csv')) 读取。"""
+    """跨问题共享输出文件的统一路径（存到 求解/ 根，供人工查阅）。
+    例：问题一将清洗后的 10 分钟级建模数据存为 shared_path('预处理数据.csv')。"""
     return os.path.join(SOLVE_DIR, name)
 
 def is_ax_empty(ax):
