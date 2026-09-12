@@ -289,7 +289,7 @@ for d in range(start, N):
         else:
             ws3.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws4 = wb.create_sheet('紧急购电量')
-ws4.append(['日期', '购电时间段', '购电量'])
+ws4.append(['日期', '紧急购电时间段', '紧急购电量'])
 for d in range(start, N):
     r = rec[d]
     em = r['emer_kwh']

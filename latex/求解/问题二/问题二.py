@@ -343,7 +343,7 @@ for d in range(S, N):
         else:
             ws2.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws3 = wb.create_sheet('紧急购电量')
-ws3.append(['日期', '购电时间段', '购电量'])
+ws3.append(['日期', '紧急购电时间段', '紧急购电量'])
 for d in range(S, N):
     runs = merge_runs(dl_all[d])
     if not runs:

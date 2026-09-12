@@ -215,6 +215,8 @@ ws1.title = '计划购电量'
 ws1.append(['时间段', '购电量'])
 for k in range(N_INT):
     ws1.append([labs_tpl[k], round(float(gE[k]), 4)])
+ws1.append(['全天购电量', round(float(gE.sum()), 4)])
+ws1.append(['全天购电费', round(float(cost), 4)])
 
 # Sheet2 充放电量：6个4小时段的充/放电量，及 0:00、24:00 储电量
 ws2 = wb.create_sheet('充放电量')
@@ -244,7 +246,7 @@ out1 = os.path.join(ROOT_OUT, 'result1.xlsx')
 wb.save(out1)
 wb.save(os.path.join(OUT_DIR, 'result1.xlsx'))
 
-# 附件5模板不含汇总表，全天指标另存 CSV，供论文与第六章灵敏度分析取数
+# 全天购电量/购电费已按模板写入 result1.xlsx；其余全天指标另存 CSV，供论文与第六章灵敏度分析取数
 pd.DataFrame([
     ('全天购电量(kWh)', round(float(gE.sum()), 4)),
     ('全天购电费(元)', round(float(cost), 4)),
@@ -254,7 +256,7 @@ pd.DataFrame([
     ('24:00储电量(kWh)', round(float(E24), 4)),
 ], columns=['指标', '数值']).to_csv(shared_path('result1_汇总.csv'), index=False, encoding='utf-8-sig')
 
-print('\n已保存 result1.xlsx（按附件5模板：计划购电量 / 充放电量）→ 求解/结果/ 与 问题一/结果/')
+print('\n已保存 result1.xlsx（按附件5模板：计划购电量 / 充放电量，含全天购电量与全天购电费）→ 求解/结果/ 与 问题一/结果/')
 print('已保存 求解/result1_汇总.csv')
 print('全部输出图完成')
 

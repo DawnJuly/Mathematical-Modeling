@@ -285,7 +285,7 @@ for d in range(start, N):
         else:
             ws2.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws3 = wb.create_sheet('紧急购电量')
-ws3.append(['日期', '购电时间段', '购电量'])
+ws3.append(['日期', '紧急购电时间段', '紧急购电量'])
 for d in range(start, N):
     runs = merge_runs(dl42[d])
     if not runs:
@@ -323,7 +323,7 @@ for d in range(start, N):
         else:
             ws3.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws4 = wb.create_sheet('紧急购电量')
-ws4.append(['日期', '购电时间段', '购电量'])
+ws4.append(['日期', '紧急购电时间段', '紧急购电量'])
 for d in range(start, N):
     em = rec43[d]['emer_kwh']
     segs = []
