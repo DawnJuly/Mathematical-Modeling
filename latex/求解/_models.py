@@ -401,3 +401,22 @@ def _hhmm(mins):
     h = (mins // 60) % 24
     m = mins % 60
     return f'{h:02d}:{m:02d}'
+
+def _tpl_hhmm(mins):
+    """附件5模板风格：无前导零的小时，跨24点加+1"""
+    if mins >= 1440:
+        return f'{mins // 60 - 24}:{mins % 60:02d}+1'
+    return f'{mins // 60}:{mins % 60:02d}'
+
+# 附件5模板表头序列（与官方模板逐格一致）
+TPL_BIN_LABELS = ['0:00-4:00', '4:00-8:00', '8:00-12:00',
+                  '12:00-16:00', '16:00-20:00', '20:00-24:00']
+
+def template_labels(last_style='0:00-0:10+1'):
+    """result2/3/4-x 计划购电量表头：起始0:10-0:20，末列由 last_style 指定。
+    index 41 复刻模板自带笔误 '7:0-7:10'。"""
+    labs = [f'{_tpl_hhmm((k + 1) * 10)}-{_tpl_hhmm((k + 2) * 10)}'
+            for k in range(N_INT)]
+    labs[41] = '7:0-7:10'
+    labs[-1] = last_style
+    return labs

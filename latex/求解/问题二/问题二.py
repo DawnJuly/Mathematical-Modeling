@@ -324,27 +324,31 @@ save_fig(fig, '图2-9_紧急购电分布')
 from openpyxl import Workbook
 wb = Workbook()
 ws = wb.active; ws.title = '计划购电量'
-labs = interval_labels()
+labs = template_labels('0:00-0:10+1')
 ws.append(['日期\\时间'] + labs + ['全天购电量', '全天购电费'])
 for d in range(S, N):
     ws.append([dates[d]] + [round(float(x), 4) for x in gE[d]]
               + [round(float(gE[d].sum()), 4), round(float(plan_all[d]), 4)])
 ws2 = wb.create_sheet('充放电量')
 ws2.append(['日期', '时间段', '充电量', '放电量', '时刻', '储电量'])
+from datetime import time as _midnight
 for d in range(S, N):
-    for bi, (a, b) in enumerate([(0, 4), (4, 8), (8, 12), (12, 16), (16, 20), (20, 24)]):
-        k0, k1 = a * 6, b * 6 - 1
+    for bi in range(len(TPL_BIN_LABELS)):
+        k0, k1 = bi * 24, bi * 24 + 23
         cq = round(float(chE[d, k0:k1 + 1].sum()), 4); dq = round(float(dchE[d, k0:k1 + 1].sum()), 4)
         if bi == 0:
-            ws2.append([dates[d], f'{a:02d}:00-{b:02d}:00', cq, dq, '00:00', round(float(E_all[d, 0]), 4)])
+            ws2.append([dates[d], TPL_BIN_LABELS[bi], cq, dq, _midnight(0, 0), round(float(E_all[d, 0]), 4)])
         elif bi == 1:
-            ws2.append([None, f'{a:02d}:00-{b:02d}:00', cq, dq, '24:00', round(float(E_all[d, -1]), 4)])
+            ws2.append([None, TPL_BIN_LABELS[bi], cq, dq, '24:00', round(float(E_all[d, -1]), 4)])
         else:
-            ws2.append([None, f'{a:02d}:00-{b:02d}:00', cq, dq, None, None])
+            ws2.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws3 = wb.create_sheet('紧急购电量')
-ws3.append(['日期', '紧急购电时间段', '紧急购电量'])
+ws3.append(['日期', '购电时间段', '购电量'])
 for d in range(S, N):
     runs = merge_runs(dl_all[d])
+    if not runs:
+        ws3.append([dates[d], None, None])
+        continue
     for i, (a, b, e) in enumerate(runs):
         ws3.append([dates[d] if i == 0 else None, f'{a}-{b}', round(e, 4)])
 for path in (os.path.join(ROOT_OUT, 'result2.xlsx'), os.path.join(OUT_DIR, 'result2.xlsx')):

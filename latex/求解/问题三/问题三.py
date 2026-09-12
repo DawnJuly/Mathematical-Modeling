@@ -257,9 +257,10 @@ save_fig(fig, '图3-6_全年费用构成')
 
 # ---------- 写 result3.xlsx ----------
 from openpyxl import Workbook
+from datetime import time as _midnight
 out = os.path.join(ROOT_OUT, 'result3.xlsx')
 wb = Workbook()
-labs = interval_labels()
+labs = template_labels('0:00-0:10+1')
 ws = wb.active; ws.title = '计划购电量'
 ws.append(['日期\\时间'] + labs + ['全天购电量', '全天购电费'])
 start = S
@@ -278,15 +279,15 @@ ws3.append(['日期', '时间段', '充电量', '放电量', '时刻', '储电�
 for d in range(start, N):
     r = rec[d]
     chE = r['chf'] * DT; dchE = r['dchf'] * DT
-    for bi, (a, b) in enumerate([(0, 4), (4, 8), (8, 12), (12, 16), (16, 20), (20, 24)]):
-        k0, k1 = a * 6, b * 6 - 1
+    for bi in range(len(TPL_BIN_LABELS)):
+        k0, k1 = bi * 24, bi * 24 + 23
         cq = round(float(chE[k0:k1 + 1].sum()), 4); dq = round(float(dchE[k0:k1 + 1].sum()), 4)
         if bi == 0:
-            ws3.append([dates[d], f'{a:02d}:00-{b:02d}:00', cq, dq, '00:00:00', round(float(r['Ef'][0]), 4)])
+            ws3.append([dates[d], TPL_BIN_LABELS[bi], cq, dq, _midnight(0, 0), round(float(r['Ef'][0]), 4)])
         elif bi == 1:
-            ws3.append([None, f'{a:02d}:00-{b:02d}:00', cq, dq, '24:00', round(float(r['Ef'][-1]), 4)])
+            ws3.append([None, TPL_BIN_LABELS[bi], cq, dq, '24:00', round(float(r['Ef'][-1]), 4)])
         else:
-            ws3.append([None, f'{a:02d}:00-{b:02d}:00', cq, dq, None, None])
+            ws3.append([None, TPL_BIN_LABELS[bi], cq, dq, None, None])
 ws4 = wb.create_sheet('紧急购电量')
 ws4.append(['日期', '购电时间段', '购电量'])
 for d in range(start, N):
@@ -304,7 +305,7 @@ for d in range(start, N):
         else:
             i += 1
     if not segs:
-        ws4.append([dates[d], None, 0.0])
+        ws4.append([dates[d], None, None])
     else:
         for si, (a, b, amt) in enumerate(segs):
             period = f'{a*10//60:02d}:{a*10%60:02d}-{b*10//60:02d}:{b*10%60:02d}'
