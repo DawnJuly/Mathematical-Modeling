@@ -193,77 +193,69 @@ style_ax(ax, '0:00储电量 E0 (kWh)', '全天购电费 (元)')
 ax.text(0.02, 0.02, '(a) 购电费对储能初值灵敏度', transform=ax.transAxes, fontsize=10, fontweight='bold')
 save_fig(fig, '图1-6_购电费灵敏度')
 
-# ---------- 4. 写 result1.xlsx（完整的计划购电策略） ----------
-import openpyxl
+# ---------- 4. 写 result1.xlsx（严格按附件5模板：工作表名/列名/时间段标签一致） ----------
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
-labs = interval_labels()
-# 每个4小时段的购电量（用于充放电量表，与表2对齐）
-gE_blocks = []
-for a, b in blocks:
-    k0, k1 = a * 6, b * 6 - 1
-    gE_blocks.append(gE[k0:k1 + 1].sum())
+def _tpl_time(m):
+    '''附件5模板时间格式：整数分钟→'H:MM'；跨日部分记作 'H:MM+1'。'''
+    if m >= 1440:
+        return f'{m // 60 - 24}:{m % 60:02d}+1'
+    return f'{m // 60}:{m % 60:02d}'
+
+# 模板标签：第 k+1 行（k=0..143）对应 [(k+1)·10,(k+2)·10] 分钟，与附件5逐行一致
+labs_tpl = [f'{_tpl_time((k + 1) * 10)}-{_tpl_time((k + 1) * 10 + 10)}' for k in range(N_INT)]
 
 wb = Workbook()
 
-# Sheet1 完整计划购电策略：144个间隔的购电功率/购电量 + 储能充放电功率 + 储电量(SOC)
+# Sheet1 计划购电量：144个10分钟间隔的购电量
 ws1 = wb.active
-ws1.title = '计划购电策略'
-ws1.append(['间隔序号', '时间段', '电价(元/kWh)', '计划购电功率(kW)', '计划购电量(kWh)',
-            '充电功率(kW)', '放电功率(kW)', '储电量(kWh)'])
+ws1.title = '计划购电量'
+ws1.append(['时间段', '购电量'])
 for k in range(N_INT):
-    ws1.append([
-        k, labs[k],
-        round(float(price[k]), 4),
-        round(float(g[k]), 4),
-        round(float(gE[k]), 4),
-        round(float(ch[k]), 4),
-        round(float(dch[k]), 4),
-        round(float(E[k + 1]), 4),
-    ])
+    ws1.append([labs_tpl[k], round(float(gE[k]), 4)])
 
-# Sheet2 6个4小时段的充放电量与购电量汇总
+# Sheet2 充放电量：6个4小时段的充/放电量，及 0:00、24:00 储电量
 ws2 = wb.create_sheet('充放电量')
-ws2.append(['时间段', '充电量', '放电量', '购电量', '时刻', '储电量'])
+ws2.append(['时间段', '充电量', '放电量', '时刻', '储电量'])
 for i, (a, b) in enumerate(blocks):
-    lab = f'{a:02d}:00-{b:02d}:00'
     _, cq, dq = block_rec[i]
+    lab = f'{a}:00-{b}:00'
     if i == 0:
-        ws2.append([lab, round(cq, 4), round(dq, 4), round(gE_blocks[i], 4), '0:00', round(float(E0), 4)])
+        ws2.append([lab, round(cq, 4), round(dq, 4), '0:00', round(float(E0), 4)])
     elif i == 1:
-        ws2.append([lab, round(cq, 4), round(dq, 4), round(gE_blocks[i], 4), '24:00', round(float(E24), 4)])
+        ws2.append([lab, round(cq, 4), round(dq, 4), '24:00', round(float(E24), 4)])
     else:
-        ws2.append([lab, round(cq, 4), round(dq, 4), round(gE_blocks[i], 4), None, None])
-
-# Sheet3 汇总
-ws3 = wb.create_sheet('汇总')
-ws3.append(['指标', '数值'])
-ws3.append(['全天购电量(kWh)', round(float(gE.sum()), 4)])
-ws3.append(['全天购电费(元)', round(float(cost), 4)])
-ws3.append(['全天充电量(kWh)', round(float(chE.sum()), 4)])
-ws3.append(['全天放电量(kWh)', round(float(dchE.sum()), 4)])
-ws3.append(['0:00储电量(kWh)', round(float(E0), 4)])
-ws3.append(['24:00储电量(kWh)', round(float(E24), 4)])
+        ws2.append([lab, round(cq, 4), round(dq, 4), None, None])
 
 # 样式：表头加粗、冻结首行、设置列宽
 hdr_font = Font(bold=True)
-for ws in (ws1, ws2, ws3):
+for ws in (ws1, ws2):
     for cell in ws[1]:
         cell.font = hdr_font
     ws.freeze_panes = 'A2'
-for i, w in enumerate([10, 14, 13, 18, 16, 14, 14, 14], 1):
+for i, w in enumerate([18, 14], 1):
     ws1.column_dimensions[get_column_letter(i)].width = w
-for i, w in enumerate([14, 14, 14, 14, 10, 12], 1):
+for i, w in enumerate([14, 12, 12, 10, 12], 1):
     ws2.column_dimensions[get_column_letter(i)].width = w
-ws3.column_dimensions['A'].width = 22
-ws3.column_dimensions['B'].width = 18
 
 out1 = os.path.join(ROOT_OUT, 'result1.xlsx')
 wb.save(out1)
 wb.save(os.path.join(OUT_DIR, 'result1.xlsx'))
-print('\n已保存 result1.xlsx（完整计划购电策略）→ 求解/结果/ 与 问题一/结果/')
+
+# 附件5模板不含汇总表，全天指标另存 CSV，供论文与第六章灵敏度分析取数
+pd.DataFrame([
+    ('全天购电量(kWh)', round(float(gE.sum()), 4)),
+    ('全天购电费(元)', round(float(cost), 4)),
+    ('全天充电量(kWh)', round(float(chE.sum()), 4)),
+    ('全天放电量(kWh)', round(float(dchE.sum()), 4)),
+    ('0:00储电量(kWh)', round(float(E0), 4)),
+    ('24:00储电量(kWh)', round(float(E24), 4)),
+], columns=['指标', '数值']).to_csv(shared_path('result1_汇总.csv'), index=False, encoding='utf-8-sig')
+
+print('\n已保存 result1.xlsx（按附件5模板：计划购电量 / 充放电量）→ 求解/结果/ 与 问题一/结果/')
+print('已保存 求解/result1_汇总.csv')
 print('全部输出图完成')
 
 # ---------- 5. 参数灵敏度（供第六章灵敏度分析，固定 E0=6000） ----------
